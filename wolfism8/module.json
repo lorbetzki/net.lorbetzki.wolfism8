@@ -1,0 +1,16 @@
+{
+    "id": "{37AF1D9E-0A7C-2BA2-1F02-120F6E4D5E24}",
+    "name": "Wolf ISM8",
+    "type": 3,
+    "vendor": "Wolf",
+    "aliases": [],
+    "parentRequirements": [        
+        "{C8792760-65CF-4C53-B5C7-A30FCC84FEFE}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{7A1272A4-CBDB-46EF-BFC6-DCF4A53D2FC7}"
+    ],
+    "prefix": "ISM",
+    "url": "https://github.com/lorbetzki/net.lorbetzki.wolfism8"
+}

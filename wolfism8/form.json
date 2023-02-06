@@ -1,0 +1,106 @@
+{
+    "elements": [
+        { 
+            "type": "Label",
+            "caption": "Please choose your system configuration"
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "HD1", 
+            "caption": "Heater device 1" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "HD2", 
+            "caption": "Heater device 2" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "HD3", 
+            "caption": "Heater device 3" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "HD4", 
+            "caption": "Heater device 4" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "MC1", 
+            "caption": "Mixer circuit 1" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "MC2", 
+            "caption": "Mixer circuit 2" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "MC3", 
+            "caption": "Mixer circuit 3" 
+        },
+        
+        {   
+            "type": "CheckBox", 
+            "name": "CM", 
+            "caption": "cascade module" 
+        },
+        
+        {   
+            "type": "CheckBox", 
+            "name": "MM1", 
+            "caption": "Mixer module 1" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "MM2", 
+            "caption": "Mixer module 2" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "MM3", 
+            "caption": "Mixer module 2" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "SM", 
+            "caption": "Solar module" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "CWL", 
+            "caption": "CWL 2 / Excellent" 
+        }
+    ],
+    "actions": [       
+        {
+            "type": "Button",
+            "caption": "Get Data",
+            "name": "GetData",
+            "onClick": "ISM_ReloadAllData($id);",
+            "visible": true
+        }
+    ],
+    "status": [
+        {  
+            "code": 102, 
+            "icon": "active", 
+            "caption": "instance is active" 
+        },
+        {  
+            "code": 104, 
+            "icon": "inactive", 
+            "caption": "timer deactivated!" 
+        },
+        {  
+            "code": 200, 
+            "icon": "error", 
+            "caption": "please enter Hostname or IP Address!" 
+        },
+        {  
+            "code": 201, 
+            "icon": "inactive", 
+            "caption": "Wifi Connection not stable, try again later!" 
+        }
+    ]
+}
