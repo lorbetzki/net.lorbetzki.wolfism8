@@ -13,8 +13,27 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			//Never delete this line!
 			parent::Create();
 
-			//create Serversocket
-			$this->RequireParent('{8062CF2B-600E-41D6-AD4B-1BA66C32D6ED}');
+			
+			// set actions for these variable
+			$this->RegisterPropertyBoolean('DTP_57', false);
+			$this->RegisterPropertyBoolean('DTP_65', false);
+			$this->RegisterPropertyBoolean('DTP_194', false);
+
+			//create Properties to disable errormessage
+			$this->RegisterPropertyBoolean('DTP_1', false);
+			$this->RegisterPropertyBoolean('DTP_14', false);
+			$this->RegisterPropertyBoolean('DTP_27', false);
+			$this->RegisterPropertyBoolean('DTP_40', false);
+			$this->RegisterPropertyBoolean('DTP_53', false);
+			$this->RegisterPropertyBoolean('DTP_106', false);
+			$this->RegisterPropertyBoolean('DTP_114', false);
+			$this->RegisterPropertyBoolean('DTP_121', false);
+			$this->RegisterPropertyBoolean('DTP_128', false);
+			$this->RegisterPropertyBoolean('DTP_135', false);
+			$this->RegisterPropertyBoolean('DTP_148', false);
+			
+			$this->ForceParent('{8062CF2B-600E-41D6-AD4B-1BA66C32D6ED}');
+			//$this->GetConfigurationForParent();
 
 		}
 
@@ -23,12 +42,44 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			//Never delete this line!
 			parent::Destroy();
 		}
+		
+		/*
+		public function GetConfigurationForParent() 
+		{
+			return json_encode(['Active' => true, 'Port' => 12004]);
+		}
+		*/
 
 		public function ApplyChanges()
 		{
 			//Never delete this line!
 			parent::ApplyChanges();
 
+			// Bei der Ersteinrichtung werden Störungsvariablen vom System empfangen obwohl entsprechende DatenID nicht existieren. Dies kann hiermit abgeschaltet werden.
+			$DTPVAR = array(1,14,27,40,53,106,114,121,128,135,148);
+			foreach($DTPVAR as $DTP){		
+
+				$DTP_IDENT="DTP_".$DTP;
+				if  ($this->ReadPropertyBoolean($DTP_IDENT))
+				{ 
+					$this->UnregisterVariable($DTP_IDENT);
+				}
+			}
+			
+			$DTPVARWRITE = array(57,65,194);
+			foreach($DTPVARWRITE as $DTP){
+
+				$DTP_IDENT="DTP_".$DTP;
+				if  ($this->ReadPropertyBoolean($DTP_IDENT))
+				{ 
+					$this->EnableAction($DTP_IDENT);	
+				}
+			}
+
+			if ($this->HasActiveParent())
+			{
+				ISM_ReloadAllData($_IPS['TARGET']);
+			}
 		}
 	
 		public function GetConfigurationForm()
@@ -41,6 +92,26 @@ require_once __DIR__ . '/../libs/datapoints.php';
 
 		public function RequestAction($Ident, $Value)
 		{
+			$this->LogMessage("RequestAction : $Ident, $Value",KL_NOTIFY);
+
+			switch($Ident)
+			{
+				case 'DTP_65':
+					$this->SetPoint($Value);
+					$this->SetValue($Ident,$Value);
+
+				break;
+				case 'DTP_57': //Betriebsstatus
+					$this->SetOperatingMode($Value);
+					$this->SetValue($Ident,$Value);
+				break;
+				case 'DTP_194': // 1x Warm Wasser Aufbereitung
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C100C2000100C2000101");
+					$this->SendData($PREP_TELEGRAM);
+					$this->SetValue($Ident, true);
+				break;
+			}
+		
 		}
 
 		// sending data to ISM
@@ -92,25 +163,28 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					}
 				
 					$DATAPOINT_TYPE = $DTP['DATAPOINT_TYPE'];
-					if (! IPS_VariableProfileExists("_ISM8_$DATAPOINT_TYPE"))
+					if (! IPS_VariableProfileExists("ISM_$DATAPOINT_TYPE"))
 					{ 
 						//echo "Profil existiert nicht!";
-						CreateVariableProfile($DATAPOINT_TYPE);
+						$this->CreateVariableProfile($DATAPOINT_TYPE);
 					}
 			
 					$IPS_IDENT = "DTP_".$DTP['DATAPOINT_ID'];
 					$IPS_NAME = $DTP['DATAPOINT_ID']."_".$DTP['DATAPOINT_NAME'];
 					$POS = 1;
+					$CREATEVAR = true;
 
-					$this->MaintainVariable($IPS_IDENT, $IPS_NAME, $DTP['DATAPOINT_IPS_TYPE'], "_ISM8_".$DTP['DATAPOINT_TYPE'], $DTP['DATAPOINT_ID'], true);
-
+					// Bei der Ersteinrichtung werden Störungsvariablen vom System empfangen obwohl entsprechende DatenID nicht existieren. Dies kann hiermit abgeschaltet werden.
+					if ( ($IPS_IDENT == "DTP_1") || ($IPS_IDENT == "DTP_14") || ($IPS_IDENT == "DTP_27") || ($IPS_IDENT == "DTP_40") || ($IPS_IDENT == "DTP_53") || 
+					($IPS_IDENT == "DTP_106") || ($IPS_IDENT == "DTP_114") || ($IPS_IDENT == "DTP_121") || ($IPS_IDENT == "DTP_128") || ($IPS_IDENT == "DTP_135") || ($IPS_IDENT == "DTP_148")) 
+					{
+						if  ($this->ReadPropertyBoolean($IPS_IDENT)){ $CREATEVAR = false; }
+					}
+					$this->MaintainVariable($IPS_IDENT, $IPS_NAME, $DTP['DATAPOINT_IPS_TYPE'], "ISM_".$DTP['DATAPOINT_TYPE'], $DTP['DATAPOINT_ID'], $CREATEVAR);
 					$this->SetValue($IPS_IDENT, $DTP_VALUE);
 
 					$this->SendDebug(__FUNCTION__, 'ReadTelegram(): ' . $IPS_IDENT . $IPS_NAME , 0);
-
 				}
-
-
 		}
 
 		private function ReadHexToArray($HEX) 
@@ -317,6 +391,10 @@ require_once __DIR__ . '/../libs/datapoints.php';
 								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 2;
 							break;
+							case "DPT_Value_Tempd_IN":
+								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
+								$DATAPOINT_IPS_TYPE = 2;
+							break;
 							case "DPT_Value_Pres":
 								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 2;
@@ -479,250 +557,249 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		private function CreateVariableProfile($DATAPOINT_TYPE)
 		{
 			include __DIR__ . '/../libs/datapoints.php';
-						switch($DATAPOINT_TYPE)
-						{
-							case "DPT_Switch": // Bool (0)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 0);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 1, "on", "", 0x00FF00);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 0, "off", "", 0xFF0000);
-							break;
-							case "DPT_Bool": // Bool (0)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 0);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 1, "true", "", 0x00FF00);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 0, "false", "", 0xFF0000);
-							break;
-							case "DPT_Enable": // Bool (0)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 0);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 1, "enable", "", 0x00FF00);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 0, "disable", "", 0xFF0000);
-							break;
-							case "DPT_OpenClose": // Bool (0)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 0);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 1, "close", "", 0x00FF00);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 0, "open", "", 0xFF0000);
-							break;
-							case "DPT_Scaling": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "%");
-								IPS_SetVariableProfileValues("_ISM8_$DATAPOINT_TYPE", "", "", "1");
-							break;
-							case "DPT_Value_Temp": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "°C");
-							break;
-							case "DPT_Value_Tempd": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "K");
-							break;
-							case "DPT_Value_Pres": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "Pa");
-							break;
-							case "DPT_Power": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "kW");
-							break;
-							case "DPT_TimeOfDay": // String (3)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 3);
-							break;
-							case "DPT_Date": // String (3)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 3);
-							break;
-							case "DPT_FlowRate_m3/h": // Float (2) 
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "m3/h");
-								//
-							break;
-							case "DPT_HVACMode": // Integer (1)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 1);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 0, "Auto", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 1, "Comfort", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 2, "Standby", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 3, "Economy", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 4, "Building Protection", "", 0xFFFFFF);
-							break;
-							case "DPT_DHWMode": // Integer (1)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 1);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 0, "Auto", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 1, "LegioProtect", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 2, "Normal", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 3, "Reduced", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 4, "Off/Frost/Protect", "", 0xFFFFFF);						
-							break;
-							case "DPT_HVACContrMode": // Integer (1)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 1);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 0, "Auto", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 1, "Heat", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 2, "Morning Warmup", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 3, "Cool", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 4, "Night Purge", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 5, "Precool", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 6, "Off", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 7, "Test", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 8, "Emergency Heat", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 9, "Fan Only", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 10, "Free Cool", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 11, "Ice", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 12, "Maximum Heating Mode", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 13, "Economic Heat/Cool Mode", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 14, "Dehumidifiation", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 15, "Calibration Mode", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 16, "Emergency Cool Mode", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 17, "Emergency Steam Mode", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_$DATAPOINT_TYPE", 20, "NoDem", "", 0xFFFFFF);
-							 break;
-							case "DPT_ActiveEnergy": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "Wh");
-							break;
-							case "DPT_ActiveEnergy_kWh": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "kWh");
-							break;
-							case "DPT_Value_Volume_Flow": // Float (2)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_$DATAPOINT_TYPE", "", "l/h");
-							break;
-							case "DPT_Value_1_Ucount": // Integer (1)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 1);
-								IPS_SetVariableProfileValues("_ISM8_$DATAPOINT_TYPE", 1, 255, 1);
-								break;
-							case "DPT_Value_2_Ucount": // Integer (1)
-								IPS_CreateVariableProfile("_ISM8_$DATAPOINT_TYPE", 1);
-								IPS_SetVariableProfileValues("_ISM8_$DATAPOINT_TYPE", 1, 65535, 1);
-							break;																	
-						}
-		} 
-		
-		private function CreateVariableInputProfile($DATAPOINT_TYPE, $DATAPOINT_ID)
-		{
-			include __DIR__ . '/../libs/datapoints.php';
+				switch($DATAPOINT_TYPE)
+				{
+					case "DPT_Switch": // Bool (0)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 0);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 1, "on", "", 0x00FF00);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 0, "off", "", 0xFF0000);
+					break;
+					case "DPT_Bool": // Bool (0)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 0);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 1, "true", "", 0x00FF00);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 0, "false", "", 0xFF0000);
+					break;
+					case "DPT_Enable": // Bool (0)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 0);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 1, "enable", "", 0x00FF00);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 0, "disable", "", 0xFF0000);
+					break;
+					case "DPT_OpenClose": // Bool (0)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 0);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 1, "close", "", 0x00FF00);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 0, "open", "", 0xFF0000);
+					break;
+					case "DPT_Scaling": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " %");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", 0, 100, 0);
+					break;
+					case "DPT_Value_Temp": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " °C");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -273, 670760, 0.01);
 
-						switch($DATAPOINT_TYPE)
-						{
-							case "DPT_Switch": // Bool (0)
-								// Profile für INPUT-ID 59-64/72-77/85-90/98-103/150-153/158/193/194/
-								IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 0);
-								IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 1, "on", "", 0x00FF00);
-								IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 0, "off", "", 0xFF0000);
-							break;
-							case "DPT_Scaling": // Float (2)
-								// Profile für INPUT-ID 198/201/204/207/209
-								IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_IN_$DATAPOINT_TYPE", "", "%");
-								IPS_SetVariableProfileValues("_ISM8_IN_$DATAPOINT_TYPE", "", "", "1");
-							break;
-							case "DPT_Value_Temp": // Float (2)
-								// Profile für INPUT-ID 56/69/82/95/199/202205/208/210
-								IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 2);
-								IPS_SetVariableProfileText("_ISM8_IN_$DATAPOINT_TYPE", "", "°C");
-								IPS_SetVariableProfileValues("_ISM8_IN_$DATAPOINT_TYPE", "20", "80", "1");						
-							break;
-							case "DPT_Value_Tempd": // Float (2)
-								// Profile für Input-ID 65/78/91/104
-								if ($DATAPOINT_ID == 65 || $DATAPOINT_ID == 78 || $DATAPOINT_ID == 91 || $DATAPOINT_ID == 106)
-								{ 
-									IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 2);
-									IPS_SetVariableProfileText("_ISM8_IN_$DATAPOINT_TYPE", "", "K");
-									IPS_SetVariableProfileValues("_ISM8_IN_$DATAPOINT_TYPE", "-4", "4", "0.5");
-								}
-								// Profile für Input-ID 66/79/92/105
-								if ($DATAPOINT_ID == 66 || $DATAPOINT_ID == 79 || $DATAPOINT_ID == 92 || $DATAPOINT_ID == 105)
-								{ 
-									IPS_CreateVariableProfile("_ISM8_IN2_$DATAPOINT_TYPE", 2);
-									IPS_SetVariableProfileText("_ISM8_IN2_$DATAPOINT_TYPE", "", "K");
-									IPS_SetVariableProfileValues("_ISM8_IN2_$DATAPOINT_TYPE", "0", "10", "0.5");
-								}
-							break;
-							case "DPT_HVACMode": // Integer (1)
-								// Profil für INPUT-ID 149
-								if ($DATAPOINT_ID == 149)
-								{ 
-									IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 1);
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 0, "Automatikbetrieb", "", 0xFFFFFF);
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 1, "Nennlüftung", "", 0xFFFFFF);
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 3, "Economy", "", 0xFFFFFF);
-								}
-								// Profil für INPUT-ID 57/70/83/96
-								if ($DATAPOINT_ID == 57 || $DATAPOINT_ID == 70 || $DATAPOINT_ID == 83 || $DATAPOINT_ID == 96)
-								{ 
-									IPS_CreateVariableProfile("_ISM8_IN2_$DATAPOINT_TYPE", 1);
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 0, "Automatikbetrieb", "", 0xFFFFFF);
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 1, "Heizbetrieb", "", 0xFFFFFF);
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 2, "Standby", "", 0xFFFFFF);
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 3, "Sparbetrieb", "", 0xFFFFFF);						
-								}
-							break;
-							case "DPT_DHWMode": // Integer (1)
-								// Profile für INPUT-ID 58/71/84/97
-								IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 1);
-								IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 0, "Automatikbetrieb", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 2, "Dauerbetrieb", "", 0xFFFFFF);
-								IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 4, "Standby", "", 0xFFFFFF);
-							break;
-							case "DPT_HVACContrMode": // Integer (1)
-								// Profile für INPUT-ID 2/15/28/41/    ACHTUNG!!!! hinter dem Befehl steht der Wert der an die Anlage gesendet werden MUSS!!
-								if ($DATAPOINT_ID == 2 || $DATAPOINT_ID == 15 || $DATAPOINT_ID == 28 || $DATAPOINT_ID == 41)
-								{ 
-									IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 1);
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 0, "Test", "", 0xFFFFFF); // 7
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 1, "Start", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 2, "Frost Heizkreis", "", 0xFFFFFF); // 11
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 3, "Frost Warmwasser", "", 0xFFFFFF); // 11
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 4, "Schornsteinfeger", "", 0xFFFFFF); // 0
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 5, "Kombibetrieb", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 6, "Parallelbetrieb", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 7, "Warmwasserbetrieb", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 8, "Warmwassernachlauf", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 9, "Mindest-Kombizeit", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 10, "Heizbetrieb", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 11, "Nachlauf Heizkreispumpe", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 12, "Frostschutz", "", 0xFFFFFF); // 11
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 13, "Standby", "", 0xFFFFFF); // 6
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 14, "Kaskadenbetrieb", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 15, "GLT-Betrieb", "", 0xFFFFFF); // 7
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 16, "Kalibration", "", 0xFFFFFF); // 15
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 17, "Kalibration Heizbetrieb", "", 0xFFFFFF); // 15
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 18, "Kalibration Warmwasserbetrieb", "", 0xFFFFFF); // 15
-									IPS_SetVariableProfileAssociation("_ISM8_IN_$DATAPOINT_TYPE", 19, "Kalibration Kombibetrieb", "", 0xFFFFFF); // 15
-								}
-								// Profile für INPUT-ID 178     ACHTUNG!!!! hinter dem Befehl steht der Wert der an die Anlage gesendet werden MUSS!!
-								if ($DATAPOINT_ID == 178)
-								{ 
-									IPS_CreateVariableProfile("_ISM8_IN2_$DATAPOINT_TYPE", 1);
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 0, "ODU Test", "", 0xFFFFFF); // 7
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 1, "Test", "", 0xFFFFFF); // 7
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 2, "Frostschutz HK", "", 0xFFFFFF); // 11
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 3, "Frostschutz Warmwasser", "", 0xFFFFFF); // 11
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 4, "Durchfluss gering", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 5, "Vorwärmung", "", 0xFFFFFF); // 2
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 6, "Abtaubetrieb", "", 0xFFFFFF); // 11
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 7, "Antilegionellenfunktion", "", 0xFFFFFF); // 0
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 8, "Warmwasserbetrieb", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 9, "WW-Nachlauf", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 10, "Heizbetrieb", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 11, "HZ-Nachlauf", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 12, "Aktive Kühlung", "", 0xFFFFFF); // 3
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 13, "Kaskade", "", 0xFFFFFF); // 1
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 14, "GLT", "", 0xFFFFFF); // 7
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 15, "Standby", "", 0xFFFFFF); // 6
-									IPS_SetVariableProfileAssociation("_ISM8_IN2_$DATAPOINT_TYPE", 16, "Pump down", "", 0xFFFFFF); // 3
-								}
-							 break;
-							case "DPT_TimeOfDay": // String (3)
-								// Profile für INPUT-ID 156/157/161/162
-								IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 3);
-							break;
-							case "DPT_Date": // String (3)
-								// Profile für INPUT-ID 154/155/159/160
-								IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 3);
-							break;
-							case "DPT_Date": // String (3)
-								// Profile für INPUT-ID 154/155/159/160
-								IPS_CreateVariableProfile("_ISM8_IN_$DATAPOINT_TYPE", 3);
-							break;
-							
+					break;
+					case "DPT_Value_Tempd": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " K");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -670760, 670760, 0.01);
+
+					break;
+					case "DPT_Value_Pres": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " Pa");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -670760, 670760, 0.01);
+					break;
+					case "DPT_Power": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " kW");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -670760, 670760, 0.01);
+					break;
+					case "DPT_TimeOfDay": // String (3)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 3);
+					break;
+					case "DPT_Date": // String (3)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 3);
+					break;
+					case "DPT_FlowRate_m3/h": // Float (2) 
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " m3/h");
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -2147483647, 2147483647, 0.0001);
+
+					break;
+					case "DPT_HVACMode": // Integer (1)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 0, "Auto", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 1, "Comfort", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 2, "Standby", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 3, "Economy", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 4, "Building Protection", "", 0xFFFFFF);
+					break;
+					case "DPT_DHWMode": // Integer (1)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 0, "Auto", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 1, "LegioProtect", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 2, "Normal", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 3, "Reduced", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 4, "Off/Frost/Protect", "", 0xFFFFFF);						
+					break;
+					case "DPT_HVACContrMode": // Integer (1)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 0, "Auto", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 1, "Heat", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 2, "Morning Warmup", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 3, "Cool", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 4, "Night Purge", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 5, "Precool", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 6, "Off", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 7, "Test", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 8, "Emergency Heat", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 9, "Fan Only", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 10, "Free Cool", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 11, "Ice", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 12, "Maximum Heating Mode", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 13, "Economic Heat/Cool Mode", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 14, "Dehumidifiation", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 15, "Calibration Mode", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 16, "Emergency Cool Mode", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 17, "Emergency Steam Mode", "", 0xFFFFFF);
+						IPS_SetVariableProfileAssociation("ISM_$DATAPOINT_TYPE", 20, "NoDem", "", 0xFFFFFF);
+						break;
+					case "DPT_ActiveEnergy": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " Wh");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -2147483647, 2147483647, 1);
+
+					break;
+					case "DPT_ActiveEnergy_kWh": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " kWh");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -2147483647, 2147483647, 1);
+					break;
+					case "DPT_Value_Volume_Flow": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " l/h");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -670760, 670760, 0.1);
+					break;
+					case "DPT_Value_1_Ucount": // Integer (1)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", 0, 255, 1);
+
+						break;
+					case "DPT_Value_2_Ucount": // Integer (1)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", 0, 65535, 1);
+
+					break;	
+					case "DPT_Value_Tempd_IN": // Float (2)
+						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 2);
+						IPS_SetVariableProfileText("ISM_$DATAPOINT_TYPE", "", " K");
+						IPS_SetVariableProfileDigits("ISM_$DATAPOINT_TYPE", 1);
+						IPS_SetVariableProfileValues("ISM_$DATAPOINT_TYPE", -4, 4, 0.5);
+					break;																
+				}
+
+				
+		} 
+
+		private function SetPoint($SetPointValue)
+		{
+			switch ($SetPointValue)
+			{
+				case -4:
+						$PREP_TELEGRAM = "8670";
+				break;
+				case -35:
+						$PREP_TELEGRAM = "86A2";
+				break;
+				case -3:
+						$PREP_TELEGRAM = "86D4";
+				break;
+
+				case -25:
+						$PREP_TELEGRAM = "8706";
+				break;
+
+				case -2:
+						$PREP_TELEGRAM = "8738";
+				break;
+
+				case -15:
+						$PREP_TELEGRAM = "876A";
+				break;
+
+				case -1:
+						$PREP_TELEGRAM = "879C";
+				break;
+
+				case -05:
+						$PREP_TELEGRAM = "87CE";
+				break;
+				case 0:
+						$PREP_TELEGRAM = "0000";
+				break;
+
+				case 05:
+						$PREP_TELEGRAM = "0032";
+				break;
+
+				case 1:
+						$PREP_TELEGRAM = "0064";
+				break;
+
+				case 15:
+						$PREP_TELEGRAM = "0096";
+				break;
+
+				case 2:
+						$PREP_TELEGRAM = "00C8";
+				break;
+
+				case 25:
+						$PREP_TELEGRAM = "00FA";
+				break;
+
+				case 3:
+						$PREP_TELEGRAM = "012C";
+				break;
+
+				case 35:
+						$PREP_TELEGRAM = "015E";
+				break;
+				case 4:
+						$PREP_TELEGRAM = "0190";
+				break;
+			}
+
+			$HEADER = "0620F080001604000000F0C10041000100410302";
+			$TELEGRAM = pack("H*" ,$HEADER.$PREP_TELEGRAM);
+			$this->SendData($TELEGRAM);			
+			$this->SendDebug(__FUNCTION__, 'SetPoint(): send Setpoint to ISM.' . $SetPointValue, 0);
+		}
+
+		// for DPT ID 57 Programmwahl Heizkreis
+		private function SetOperatingMode($ONOFF)
+		{
+			switch ($ONOFF)
+			{
+				case 2: // heater off
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003900010039000102");
+				break;
+				case 1: //heater Comfort
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003900010039000101");
+				break;
+				case 0: //heater Auto
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003900010039000100");
+				break;
+				case 3: //heater Economy
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003900010039000103");
+				break;
+				case 4: //heater Building protection
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003900010039000104");
+				break;
+			}
 		
-						}
+			$this->SendData($PREP_TELEGRAM);			
+			$this->SendDebug(__FUNCTION__, 'SetOperatingMode(): set mode to ISM ' . $ONOFF, 0);
+
 		}
 }

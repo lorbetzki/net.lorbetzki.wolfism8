@@ -2,74 +2,81 @@
     "elements": [
         { 
             "type": "Label",
-            "caption": "Please choose your system configuration"
+            "caption": "Wähle aus, welche Variablen Werte an die Heizanlage senden können. Datenpunkt ID in Klammer."
         },
         {   
             "type": "CheckBox", 
-            "name": "HD1", 
-            "caption": "Heater device 1" 
+            "name": "DTP_57", 
+            "caption": "Programmwahl Heizkreis (57)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "HD2", 
-            "caption": "Heater device 2" 
+            "name": "DTP_65", 
+            "caption": "Sollwertkorrektur (65)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "HD3", 
-            "caption": "Heater device 3" 
+            "name": "DTP_194", 
+            "caption": "1x Warmwasserladung (Global) (194)" 
+        },
+        { 
+            "type": "Label",
+            "caption": "Variable für Störungsmeldung entfernen, Datenpunkt ID in Klammer"
         },
         {   
             "type": "CheckBox", 
-            "name": "HD4", 
-            "caption": "Heater device 4" 
+            "name": "DTP_1", 
+            "caption": "Heizgerät 1 (1)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "MC1", 
-            "caption": "Mixer circuit 1" 
+            "name": "DTP_14", 
+            "caption": "Heizgerät 2 (14)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "MC2", 
-            "caption": "Mixer circuit 2" 
+            "name": "DTP_27", 
+            "caption": "Heizgerät 3 (27)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "MC3", 
-            "caption": "Mixer circuit 3" 
-        },
-        
-        {   
-            "type": "CheckBox", 
-            "name": "CM", 
-            "caption": "cascade module" 
-        },
-        
-        {   
-            "type": "CheckBox", 
-            "name": "MM1", 
-            "caption": "Mixer module 1" 
+            "name": "DTP_40", 
+            "caption": "Heizgerät 4 (40)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "MM2", 
-            "caption": "Mixer module 2" 
+            "name": "DTP_53", 
+            "caption": "Systembedienmodul (53)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "MM3", 
-            "caption": "Mixer module 2" 
+            "name": "DTP_106", 
+            "caption": "Kaskadenmodul (106)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "SM", 
-            "caption": "Solar module" 
+            "name": "DTP_114", 
+            "caption": "Mischermodul 1 (114)" 
         },
         {   
             "type": "CheckBox", 
-            "name": "CWL", 
-            "caption": "CWL 2 / Excellent" 
+            "name": "DTP_121", 
+            "caption": "Mischermodul 2 (121)" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "DTP_128", 
+            "caption": "Mischermodul 3 (128)" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "DTP_135", 
+            "caption": "Solarmodul (135)" 
+        },
+        {   
+            "type": "CheckBox", 
+            "name": "DTP_148", 
+            "caption": "CWL Excellent / CWL 2 (148)" 
         }
     ],
     "actions": [       
@@ -78,6 +85,20 @@
             "caption": "Get Data",
             "name": "GetData",
             "onClick": "ISM_ReloadAllData($id);",
+            "visible": true
+        },
+        {
+            "type": "Button",
+            "caption": "Set Warm Water",
+            "name": "SetPoint",
+            "onClick": "IPS_RequestAction($id, 'SetWarmWater', '0');",
+            "visible": true
+        },
+        {
+            "type": "Button",
+            "caption": "Set ACTION",
+            "name": "Setaction",
+            "onClick": "IPS_RequestAction($id, 'SetAction', 'DTP_194');",
             "visible": true
         }
     ],

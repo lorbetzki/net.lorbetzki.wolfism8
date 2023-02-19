@@ -66,7 +66,7 @@ $DP = array(
 						array("62","BM-2 0","Warmwasser Zeitprogramm 1","DPT_Switch","Out","In","-"),
 						array("63","BM-2 0","Warmwasser Zeitprogramm 2","DPT_Switch","Out","In","-"),
 						array("64","BM-2 0","Warmwasser Zeitprogramm 3","DPT_Switch","Out","In","-"),
-						array("65","BM-2 0","Sollwertkorrektur","DPT_Value_Tempd","Out","In","K"),
+						array("65","BM-2 0","Sollwertkorrektur","DPT_Value_Tempd_IN","Out","In","K"),
 						array("66","BM-2 0","Sparfaktor","DPT_Value_Tempd","Out","In","K"),
 						array("67","BM-2 1","Störung","DPT_Switch","Out","-","-"),
 						array("68","BM-2 1","Raumtemperatur","DPT_Value_Temp","Out","-","°C"),
