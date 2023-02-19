@@ -323,7 +323,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		//		      [DATAPOINT_UNIT]		=	wenn eine Ausgabe erfolgt, dann ist das die Einheit bspw % oder °C	
 		//			  [DATAPOINT_IPS_TYPE ] = 0 =bool, 1 = integer , 2=Float, 3 = String
 
-		public function ReadTelegram($HEX)
+		private function ReadTelegram($HEX)
 		{
 			include __DIR__ . '/../libs/datapoints.php';
 
@@ -800,6 +800,5 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		
 			$this->SendData($PREP_TELEGRAM);			
 			$this->SendDebug(__FUNCTION__, 'SetOperatingMode(): set mode to ISM ' . $ONOFF, 0);
-
 		}
 }

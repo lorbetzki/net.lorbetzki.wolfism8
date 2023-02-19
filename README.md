@@ -26,17 +26,17 @@
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' kann das 'Pontos Base V2'-Modul mithilfe des Schnellfilters gefunden werden.  
+ Unter 'Instanz hinzufügen' kann das 'Wolf ISM8'-Modul mithilfe des Schnellfilters gefunden werden.  
 	- Weitere Informationen zum Hinzufügen von Instanzen in der [Dokumentation der Instanzen](https://www.symcon.de/service/dokumentation/konzepte/instanzen/#Instanz_hinzufügen)
 
 __Konfigurationsseite__:
 
 Name          				     | Beschreibung
 -------------------------------- | -------------------------------------------------------
- IP Adresse                      | IP Adresse oder Hostname des Gerätes
-Intervall in sek                 | Abrufintervall. 0 deaktiviert das automatische abrufen
-Auswahl Standardvariablen        | Auswahl diverser Variablen
-Auswahl zusätzlicher Variablen   | Auswahl diverser Variablen
+			                     | 
+            					 | 
+                                 | 
+   								 | 
 
 ### 5. Statusvariablen und Profile
 
@@ -61,11 +61,16 @@ Name                          							| Typ     | Beschreibung
 
 ### 7. PHP-Befehlsreferenz
 
-`PB_UpdateData(integer $InstanzID);`
+`ISM_ReloadAllData(integer $InstanzID);`
 
-Aktualisierung aller Daten.
+fordert vom ISM8 eine Aktualisierung aller Daten an.
 
-`PB_GetData(integer $InstanzID, string $Key="all");`
+`ISM_SendData()(integer $InstanzID, $HexData);`
 
-wird `PB_GetData(12345);` ohne Paramter aufgerufen werden viele Daten abgeholt, jedoch nicht alle. Möchte man bestimmte Daten. Bspw. 
-`PB_GetData(12345, "CND");` wird die Wasserleitfähigkeit abgeholt.
+sendet ein hexcodiertes String zur Anlage. 
+
+Beispiel:
+
+`// sendet den Befehl 1x Warmwasser zur Anlage`
+`$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C100C2000100C2000101");`
+`ISM_SendData(12345, $PREP_TELEGRAM);`
