@@ -32,11 +32,7 @@
 __Konfigurationsseite__:
 
 Name          				     | Beschreibung
--------------------------------- | -------------------------------------------------------
-			                     | 
-            					 | 
-                                 | 
-   								 | 
+-------------------------------- | ----------------------------------------------------
 
 ### 5. Statusvariablen und Profile
 
@@ -72,5 +68,7 @@ sendet ein hexcodiertes String zur Anlage.
 Beispiel:
 
 `// sendet den Befehl 1x Warmwasser zur Anlage`
+
 `$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C100C2000100C2000101");`
+
 `ISM_SendData(12345, $PREP_TELEGRAM);`
