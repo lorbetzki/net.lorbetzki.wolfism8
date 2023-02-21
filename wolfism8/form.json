@@ -19,86 +19,88 @@
             "name": "DTP_194", 
             "caption": "1x Warmwasserladung (Global) (194)" 
         },
-        { 
-            "type": "Label",
-            "caption": "Variable für Störungsmeldung entfernen, Datenpunkt ID in Klammer"
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_1", 
-            "caption": "Heizgerät 1 (1)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_14", 
-            "caption": "Heizgerät 2 (14)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_27", 
-            "caption": "Heizgerät 3 (27)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_40", 
-            "caption": "Heizgerät 4 (40)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_53", 
-            "caption": "Systembedienmodul (53)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_106", 
-            "caption": "Kaskadenmodul (106)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_114", 
-            "caption": "Mischermodul 1 (114)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_121", 
-            "caption": "Mischermodul 2 (121)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_128", 
-            "caption": "Mischermodul 3 (128)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_135", 
-            "caption": "Solarmodul (135)" 
-        },
-        {   
-            "type": "CheckBox", 
-            "name": "DTP_148", 
-            "caption": "CWL Excellent / CWL 2 (148)" 
-        }
+
+        {
+            "type": "ExpansionPanel",
+            "caption": "Optional: Störungsmeldungen entfernen",
+            "visible": true,
+            "name": "VarPanel",
+            "items": [
+                        { 
+                            "type": "Label",
+                            "caption": "Variable für Störungsmeldung entfernen, Datenpunkt ID in Klammer"
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_1", 
+                            "caption": "Heizgerät 1 (1)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_14", 
+                            "caption": "Heizgerät 2 (14)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_27", 
+                            "caption": "Heizgerät 3 (27)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_40", 
+                            "caption": "Heizgerät 4 (40)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_53", 
+                            "caption": "Systembedienmodul (53)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_106", 
+                            "caption": "Kaskadenmodul (106)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_114", 
+                            "caption": "Mischermodul 1 (114)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_121", 
+                            "caption": "Mischermodul 2 (121)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_128", 
+                            "caption": "Mischermodul 3 (128)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_135", 
+                            "caption": "Solarmodul (135)" 
+                        },
+                        {   
+                            "type": "CheckBox", 
+                            "name": "DTP_148", 
+                            "caption": "CWL Excellent / CWL 2 (148)" 
+                        }
+                    ]
+                }
     ],
     "actions": [       
         {
             "type": "Button",
-            "caption": "Get Data",
+            "caption": "Daten neu laden",
             "name": "GetData",
             "onClick": "ISM_ReloadAllData($id);",
             "visible": true
         },
         {
             "type": "Button",
-            "caption": "Set Warm Water",
+            "caption": "Warm Water Ladung starten",
             "name": "SetPoint",
-            "onClick": "IPS_RequestAction($id, 'SetWarmWater', '0');",
-            "visible": true
-        },
-        {
-            "type": "Button",
-            "caption": "Set ACTION",
-            "name": "Setaction",
-            "onClick": "IPS_RequestAction($id, 'SetAction', 'DTP_194');",
+            "onClick": "IPS_RequestAction($id, 'DTP_194', '0');",
             "visible": true
         }
     ],
@@ -106,22 +108,7 @@
         {  
             "code": 102, 
             "icon": "active", 
-            "caption": "instance is active" 
-        },
-        {  
-            "code": 104, 
-            "icon": "inactive", 
-            "caption": "timer deactivated!" 
-        },
-        {  
-            "code": 200, 
-            "icon": "error", 
-            "caption": "please enter Hostname or IP Address!" 
-        },
-        {  
-            "code": 201, 
-            "icon": "inactive", 
-            "caption": "Wifi Connection not stable, try again later!" 
+            "caption": "instance ist aktiv" 
         }
     ]
 }
