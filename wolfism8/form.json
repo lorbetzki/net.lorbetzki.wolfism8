@@ -2,22 +2,25 @@
     "elements": [
         { 
             "type": "Label",
-            "caption": "Wähle aus, welche Variablen Werte an die Heizanlage senden können. Datenpunkt ID in Klammer."
+            "caption": "Wähle aus, welche Variablen Werte an die Heizanlage senden können. Datenpunkt ID in Klammer. Sollte nichts sichtbar sein, bitte einmalig Daten holen und warten. Es erscheinen alle vom Modul beschreibbare Datenpunkte"
         },
         {   
             "type": "CheckBox", 
             "name": "DTP_57", 
-            "caption": "Programmwahl Heizkreis (57)" 
+            "caption": "Programmwahl Heizkreis (57)",
+            "visible": false
         },
         {   
             "type": "CheckBox", 
             "name": "DTP_65", 
-            "caption": "Sollwertkorrektur (65)" 
+            "caption": "Sollwertkorrektur (65)",
+            "visible": false
         },
         {   
             "type": "CheckBox", 
             "name": "DTP_194", 
-            "caption": "1x Warmwasserladung (Global) (194)" 
+            "caption": "1x Warmwasserladung (Global) (194)",
+            "visible": false
         },
 
         {
@@ -98,17 +101,17 @@
         },
         {
             "type": "Button",
-            "caption": "Warm Water Ladung starten",
-            "name": "SetPoint",
+            "caption": "Warmwasser Ladung starten",
+            "name": "SetDTP_194",
             "onClick": "IPS_RequestAction($id, 'DTP_194', '0');",
             "visible": true
         }
     ],
     "status": [
         {  
-            "code": 102, 
+            "code": 100, 
             "icon": "active", 
-            "caption": "instance ist aktiv" 
+            "caption": "instance ist aktiv"     
         }
     ]
 }
