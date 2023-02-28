@@ -2,7 +2,7 @@
     "elements": [
         { 
             "type": "Label",
-            "caption": "Wähle aus, welche Variablen Werte an die Heizanlage senden können. Datenpunkt ID in Klammer. Sollte nichts sichtbar sein, bitte einmalig Daten holen und warten. Es erscheinen alle vom Modul beschreibbare Datenpunkte"
+            "caption": "Wähle aus, welche Variablen Werte an die Heizanlage senden können. Datenpunkt ID in Klammer. Sollte nichts sichtbar sein, bitte einmalig Daten holen und warten. Es erscheinen alle vom Modul beschreibbare Datenpunkte. INFO: Bis die Anlage den gesendeten Datenpunkt verarbeitet hat, kann bis zu einer Minute vergehen."
         },
         {   
             "type": "CheckBox", 

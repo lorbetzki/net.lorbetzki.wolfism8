@@ -642,9 +642,9 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					case "DPT_HVACMode": // Integer (1)
 						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
 							[0, "Auto", "", 0xFFFFFF ],
-							[1, "Comfort", "", 0xFFFFFF],
+							[1, "Comfort/Heizbetrieb", "", 0xFFFFFF],
 							[2, "Standby", "", 0xFFFFFF],
-							[3, "Economy", "", 0xFFFFFF],
+							[3, "Economy/Sparbetrieb", "", 0xFFFFFF],
 							[4, "Building Protection", "", 0xFFFFFF]
 						]);
 					break;
@@ -710,14 +710,14 @@ require_once __DIR__ . '/../libs/datapoints.php';
 				case -4:
 						$PREP_TELEGRAM = "8670";
 				break;
-				case -35:
+				case -3.5:
 						$PREP_TELEGRAM = "86A2";
 				break;
 				case -3:
 						$PREP_TELEGRAM = "86D4";
 				break;
 
-				case -25:
+				case -2.5:
 						$PREP_TELEGRAM = "8706";
 				break;
 
@@ -725,7 +725,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$PREP_TELEGRAM = "8738";
 				break;
 
-				case -15:
+				case -1.5:
 						$PREP_TELEGRAM = "876A";
 				break;
 
@@ -733,14 +733,14 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$PREP_TELEGRAM = "879C";
 				break;
 
-				case -05:
+				case -0.5:
 						$PREP_TELEGRAM = "87CE";
 				break;
 				case 0:
 						$PREP_TELEGRAM = "0000";
 				break;
 
-				case 05:
+				case 0.5:
 						$PREP_TELEGRAM = "0032";
 				break;
 
@@ -748,7 +748,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$PREP_TELEGRAM = "0064";
 				break;
 
-				case 15:
+				case 1.5:
 						$PREP_TELEGRAM = "0096";
 				break;
 
@@ -756,7 +756,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$PREP_TELEGRAM = "00C8";
 				break;
 
-				case 25:
+				case 2.5:
 						$PREP_TELEGRAM = "00FA";
 				break;
 
@@ -764,7 +764,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$PREP_TELEGRAM = "012C";
 				break;
 
-				case 35:
+				case 3.5:
 						$PREP_TELEGRAM = "015E";
 				break;
 				case 4:
