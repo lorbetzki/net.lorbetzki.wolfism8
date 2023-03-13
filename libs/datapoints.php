@@ -215,5 +215,20 @@ $DP = array(
 						array("251","BM-2 0","Erkennung verfügbare Heiz-/Mischerkreise","DPT_Value_1_Ucount","Out","-","-"),
 						array("355","BM-2 0","Erkennung verfügbarer Geräte 1","DPT_Value_2_Ucount","Out","-","-"),
 						array("356","BM-2 0","Erkennung verfügbarer Geräte 1","DPT_Value_2_Ucount","Out","-","-"),			
-						array("358","BM-2 0","Erkennung vorhandener Warmwasserkreise","DPT_Value_1_Ucount","Out","-","-")			
+						array("357","BM-2","Unterscheidung Heizgerätetyp (HG1)","DPT_Value_1_Ucount","Out","-","-"),
+						array("358","BM-2","Erkennung vorhandener Warmwasserkreise","DPT_Value_1_Ucount","Out","-","-"),
+						array("359","BM-2","Unterscheidung Heizgerätetyp (HG2)","DPT_Value_1_Ucount","Out","-","-"),
+						array("360","BM-2","Unterscheidung Heizgerätetyp (HG3)","DPT_Value_1_Ucount","Out","-","-"),
+						array("361","BM-2","Unterscheidung Heizgerätetyp (HG4)","DPT_Value_1_Ucount","Out","-","-"),
+						array("362","BM-2","Erkennung Leer","DPT_Value_2_Ucount","Out","-","-"),
+						array("363","BM-2","Erkennung Leer","DPT_Value_2_Ucount","Out","-","-"),
+						array("364","Heizgerät 1","Kesselsolltemperatur HG1 lesen","DPT_Value_Temp","Out","-","°C"),
+						array("365","Heizgerät 2","Kesselsolltemperatur HG2 lesen","DPT_Value_Temp","Out","-","°C"),
+						array("366","Heizgerät 3","Kesselsolltemperatur HG3 lesen","DPT_Value_Temp","Out","-","°C"),
+						array("367","Heizgerät 4","Kesselsolltemperatur HG4 lesen","DPT_Value_Temp","Out","-","°C"),
+						array("368","BM-2(0)","Vorlaufsolltemperatur dir. HK - lesen","DPT_Value_Temp","Out","-","°C"),
+						array("369","BM-2(0)","Mischersolltemperatur MK1 - lesen","DPT_Value_Temp","Out","-","°C"),
+						array("370","BM-2(0)","Mischersolltemperatur MK2 - lesen","DPT_Value_Temp","Out","-","°C"),
+						array("371","BM-2(0)","Mischersolltemperatur MK3 - lesen","DPT_Value_Temp","Out","-","°C"),
+						array("372","Allgemein","Zuletzt aktiver Störcode","DPT_Value_1_Ucount","Out","-","-")									
 );
