@@ -341,6 +341,17 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			return $ret;
 		}
 
+		private function PdtUcount1($HEX)
+		{
+			return ($HEX & 0xff);
+		}
+		
+		private function PdtUcount2($HEX)
+		{
+			return ($HEX & 0xffff);
+		}
+
+		
 		// Sobald man diese Funktion aufruft mit den Heizungstelegram als wert, wird das ganze als array aufgelöst. 
 		//            [DATAPOINT_ID] 		= 	Integer, der Wert kann dann in den Datenpunkten-Include gesucht werden
 		//            [DATAPOINT_NAME] 		= 	Name des Datenpunkte
@@ -561,7 +572,14 @@ require_once __DIR__ . '/../libs/datapoints.php';
 								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 2;
 							break;						
-													
+							case "DPT_Value_1_Ucount":
+								$DATAPOINT_TYPE_VALUE = $this->PdtUcount1($DATAPOINT_VALUE_VAL);
+								$DATAPOINT_IPS_TYPE = 1;
+							break;
+							case "DPT_Value_2_Ucount":
+								$DATAPOINT_TYPE_VALUE = $this->PdtUcount2($DATAPOINT_VALUE_VAL);
+								$DATAPOINT_IPS_TYPE = 1;
+							break;						
 						}
 						// Die Datapoint Länge setzt sich zusammen aus Datapoint ID (2) Datapoint Kommado (1) und Länge (1)
 						$DATAPOINT_POS += 4 + "$DATAPOINT_LENGTH_VAL";
@@ -579,6 +597,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							"DATAPOINT_IPS_TYPE"		=>		"$DATAPOINT_IPS_TYPE"							
 						);	
 				}
+				
 				return $ReturnArray;	
 			}
 		}
