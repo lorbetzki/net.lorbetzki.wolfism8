@@ -15,8 +15,16 @@ require_once __DIR__ . '/../libs/datapoints.php';
 
 			
 			// set actions for these variable
+			$this->RegisterPropertyBoolean('DTP_56', false);
 			$this->RegisterPropertyBoolean('DTP_57', false);
+			$this->RegisterPropertyBoolean('DTP_58', false);
 			$this->RegisterPropertyBoolean('DTP_65', false);
+			$this->RegisterPropertyBoolean('DTP_69', false);
+			$this->RegisterPropertyBoolean('DTP_82', false);
+			$this->RegisterPropertyBoolean('DTP_95', false);
+			$this->RegisterPropertyBoolean('DTP_70', false);
+			$this->RegisterPropertyBoolean('DTP_83', false);
+			$this->RegisterPropertyBoolean('DTP_96', false);
 			$this->RegisterPropertyBoolean('DTP_194', false);
 
 			//create Properties to disable errormessage
@@ -75,7 +83,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 				}
 			}
 			
-			$DTPVARWRITE = array(57,65,194);
+			$DTPVARWRITE = array(56,57,58,65,69,70,82,83,95,96,194);
 			foreach($DTPVARWRITE as $DTP){
 
 				$DTP_IDENT="DTP_".$DTP;
@@ -95,18 +103,61 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		{
 			$jsonForm = json_decode(file_get_contents(__DIR__ . "/form.json"), true);
 
-			// prüfe ob DTP 57, 65 oder 194 als Variable angelegt wurde und bietet den User an, zu der Variable eine "Action" hinzuzufügen.
-			if  (@$this->GetIDForIdent('DTP_57'))
+			// prüfe ob DTP 56-58, 65 oder 194 als Variable angelegt wurde und bietet den User an, zu der Variable eine "Action" hinzuzufügen.
+			// Warmwasser Solltemp
+			if  (@$this->GetIDForIdent('DTP_56'))
 			{
 				$jsonForm["elements"][1]["visible"] = true;
 			}
-			if  (@$this->GetIDForIdent('DTP_65'))
+			// Programmwahl heizung/mischer
+			if  (@$this->GetIDForIdent('DTP_57'))
 			{
 				$jsonForm["elements"][2]["visible"] = true;
 			}
-			if  (@$this->GetIDForIdent('DTP_194'))
+			// Programmwahl warmwasser
+			if  (@$this->GetIDForIdent('DTP_58'))
 			{
 				$jsonForm["elements"][3]["visible"] = true;
+			}
+			// Sollwertkorrektur
+			if  (@$this->GetIDForIdent('DTP_65'))
+			{
+				$jsonForm["elements"][4]["visible"] = true;
+			}
+
+			// Warmwasser Solltemp Mischerkreise
+			if  (@$this->GetIDForIdent('DTP_69'))
+			{
+				$jsonForm["elements"][5]["visible"] = true;
+			}
+			if  (@$this->GetIDForIdent('DTP_82'))
+			{
+				$jsonForm["elements"][6]["visible"] = true;
+			}
+			if  (@$this->GetIDForIdent('DTP_95'))
+			{
+				$jsonForm["elements"][7]["visible"] = true;
+			}
+
+
+			// Programmwahl heizung/mischer
+			if  (@$this->GetIDForIdent('DTP_70'))
+			{
+				$jsonForm["elements"][6]["visible"] = true;
+			}
+			if  (@$this->GetIDForIdent('DTP_83'))
+			{
+				$jsonForm["elements"][7]["visible"] = true;
+			}
+			if  (@$this->GetIDForIdent('DTP_96'))
+			{
+				$jsonForm["elements"][8]["visible"] = true;
+			}
+			
+			// 1x Warmwasserladung (global)
+			if  (@$this->GetIDForIdent('DTP_194'))
+			{
+				$jsonForm["elements"][9]["visible"] = true;
 			}
 			
 			return json_encode($jsonForm);
@@ -124,8 +175,22 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					$this->SetValue($Ident,$Value);
 
 				break;
-				case 'DTP_57': //Betriebsstatus
-					$this->SetOperatingMode($Value);
+				case 'DTP_56': //Warmwassertemp setzen
+				case 'DTP_69':
+				case 'DTP_82':
+				case 'DTP_95': 
+					$this->HotWaterTargetTemp($Value);
+					$this->SetValue($Ident,$Value);
+				break;
+				case 'DTP_57': //Betriebsstatus Heizkreis
+				case 'DTP_70':	
+				case 'DTP_83':
+				case 'DTP_96':
+					$this->SetOperatingModeHeat($Value);
+					$this->SetValue($Ident,$Value);
+				break;
+				case 'DTP_58': //Betriebsstatus Warmwasser
+					$this->SetOperatingModeWater($Value);
 					$this->SetValue($Ident,$Value);
 				break;
 				case 'DTP_194': // 1x Warmwasser Aufbereitung
@@ -579,7 +644,44 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							case "DPT_Value_2_Ucount":
 								$DATAPOINT_TYPE_VALUE = $this->PdtUcount2($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 1;
-							break;						
+							break;
+							case "DPT_HVACMode_HG":
+								switch($DATAPOINT_VALUE_VAL)
+								{
+									case "0":
+													$DATAPOINT_TYPE_VALUE = 0; //"Auto"
+									break;
+									case "1":
+													$DATAPOINT_TYPE_VALUE = 1; //"Heizbetrieb"
+									break;
+									case "2":
+													$DATAPOINT_TYPE_VALUE = 2; //"Standby"
+									break;
+									case "3":
+													$DATAPOINT_TYPE_VALUE = 3; //"Sparbetrieb"
+									break;
+								}
+								$DATAPOINT_IPS_TYPE = 1;
+							break;
+							case "DPT_DHWMode_WW":
+									switch($DATAPOINT_VALUE_VAL)
+									{
+										case "0":
+														$DATAPOINT_TYPE_VALUE = 0; //"Auto"
+										break;
+										case "2":
+														$DATAPOINT_TYPE_VALUE = 2; //"Normal"
+										break;
+										case "4":
+														$DATAPOINT_TYPE_VALUE = 4; //"Standby"
+										break;
+								}
+								$DATAPOINT_IPS_TYPE = 1;
+							break;
+							case "DPT_Value_Temp_WW":
+								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
+								$DATAPOINT_IPS_TYPE = 2;
+							break;
 						}
 						// Die Datapoint Länge setzt sich zusammen aus Datapoint ID (2) Datapoint Kommado (1) und Länge (1)
 						$DATAPOINT_POS += 4 + "$DATAPOINT_LENGTH_VAL";
@@ -667,6 +769,14 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							[4, "Building Protection", "", 0xFFFFFF]
 						]);
 					break;
+					case "DPT_HVACMode_HG": // Integer (1)
+						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
+							[0, "Automatikbetrieb", "", 0xFFFFFF ],
+							[1, "Heizbetrieb", "", 0xFFFFFF],
+							[2, "Standby", "", 0xFFFFFF],
+							[3, "Sparbetrieb", "", 0xFFFFFF],
+						]);
+					break;
 					case "DPT_DHWMode": // Integer (1)
 						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
 							[0, "Auto", "", 0xFFFFFF ],
@@ -674,6 +784,13 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							[2, "Normal", "", 0xFFFFFF],
 							[3, "Reduced", "", 0xFFFFFF],
 							[4, "Off/Frost/Protect", "", 0xFFFFFF]
+						]);
+					break;
+					case "DPT_DHWMode_WW": // Integer (1)
+						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
+							[0, "Automatikbetrieb", "", 0xFFFFFF ],
+							[2, "Dauerbetrieb", "", 0xFFFFFF],
+							[4, "Standby", "", 0xFFFFFF]
 						]);
 					break;
 					case "DPT_HVACContrMode": // Integer (1)
@@ -716,80 +833,40 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					break;	
 					case "DPT_Value_Tempd_IN": // Float (2)
 						$this->RegisterProfileFloat("ISM_$DATAPOINT_TYPE", '', '', ' K', -4, 4, 0.5, 1);
-					break;																
+					break;											
+					case "DPT_Value_1_Ucount_Erkennung":
+						$DATAPOINT_TYPE_VALUE = $this->PdtUcount1($DATAPOINT_VALUE_VAL);
+						$DATAPOINT_IPS_TYPE = 1;
+					break;
+					case "DPT_Value_1_Ucount_Erkennung": // Integer (1)
+						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
+							[0, "Kein Heizgerät", "", 0xFFFFFF ],
+							[1, "CGB-2", "", 0xFFFFFF],
+							[2, "MGK-2", "", 0xFFFFFF],
+							[3, "TOB", "", 0xFFFFFF],
+							[4, "BWL-1S", "", 0xFFFFFF],
+							[5, "FGB", "", 0xFFFFFF],
+							[6, "CHA", "", 0xFFFFFF],
+							[7, "COB-2", "", 0xFFFFFF],
+							[8, "CGB-2 38/55", "", 0xFFFFFF],
+							[9, "CGB-2 38/55", "", 0xFFFFFF],
+							[10, "TGB-2", "", 0xFFFFFF],
+							[11, "TGB-2", "", 0xFFFFFF],
+							[12, "CGB-2 75/100", "", 0xFFFFFF],
+							[13, "CGB-2 75/100", "", 0xFFFFFF],
+							[14, "FHA", "", 0xFFFFFF]
+						]);
+						break;
+					case "DPT_Value_Temp_WW": // Float (2)
+						$this->RegisterProfileFloat("ISM_$DATAPOINT_TYPE", '', '', ' °C', 25, 65, 1, 1);
+					break;					
 				}
-
-				
 		} 
-
+		// DPT ID 65 Sollwertkorrektur
 		private function SetPoint($SetPointValue)
 		{
-			switch ($SetPointValue)
-			{
-				case -4:
-						$PREP_TELEGRAM = "8670";
-				break;
-				case -3.5:
-						$PREP_TELEGRAM = "86A2";
-				break;
-				case -3:
-						$PREP_TELEGRAM = "86D4";
-				break;
-
-				case -2.5:
-						$PREP_TELEGRAM = "8706";
-				break;
-
-				case -2:
-						$PREP_TELEGRAM = "8738";
-				break;
-
-				case -1.5:
-						$PREP_TELEGRAM = "876A";
-				break;
-
-				case -1:
-						$PREP_TELEGRAM = "879C";
-				break;
-
-				case -0.5:
-						$PREP_TELEGRAM = "87CE";
-				break;
-				case 0:
-						$PREP_TELEGRAM = "0000";
-				break;
-
-				case 0.5:
-						$PREP_TELEGRAM = "0032";
-				break;
-
-				case 1:
-						$PREP_TELEGRAM = "0064";
-				break;
-
-				case 1.5:
-						$PREP_TELEGRAM = "0096";
-				break;
-
-				case 2:
-						$PREP_TELEGRAM = "00C8";
-				break;
-
-				case 2.5:
-						$PREP_TELEGRAM = "00FA";
-				break;
-
-				case 3:
-						$PREP_TELEGRAM = "012C";
-				break;
-
-				case 3.5:
-						$PREP_TELEGRAM = "015E";
-				break;
-				case 4:
-						$PREP_TELEGRAM = "0190";
-				break;
-			}
+			// sichergehen das 4bytes erstellt werden
+			$PREP_TELEGRAM = substr("0000".$this->PdtKNXFloatDec($SetPointValue),-4);
 
 			$HEADER = "0620F080001604000000F0C10041000100410302";
 			$TELEGRAM = pack("H*" ,$HEADER.$PREP_TELEGRAM);
@@ -798,7 +875,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		}
 
 		// for DPT ID 57 Programmwahl Heizkreis
-		private function SetOperatingMode($ONOFF)
+		private function SetOperatingModeHeat($ONOFF)
 		{
 			switch ($ONOFF)
 			{
@@ -820,6 +897,37 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			}
 		
 			$this->SendData($PREP_TELEGRAM);			
-			$this->SendDebug(__FUNCTION__, 'SetOperatingMode(): set mode to ISM ' . $ONOFF, 0);
+			$this->SendDebug(__FUNCTION__, 'SetOperatingModeHeat(): set mode to ISM ' . $ONOFF, 0);
+		}
+
+		// for DPT ID 58 Programmwahl Warmwasser
+		private function SetOperatingModeWater($ONOFF)
+		{
+			switch ($ONOFF)
+			{
+				case 4: // Warmwater off
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003A0001003A000104");
+				break;
+				case 0: //Auto
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003A0001003A000100");
+				break;
+				case 2: //permanent
+					$PREP_TELEGRAM = pack("H*" ,"0620F080001504000000F0C1003A0001003A000102");
+				break;
+			}
+		
+			$this->SendData($PREP_TELEGRAM);			
+			$this->SendDebug(__FUNCTION__, 'SetOperatingModeWater(): set mode to ISM ' . $ONOFF, 0);
+		}
+
+		// DPT ID 56 Warmwassersolltemperatur
+		private function HotWaterTargetTemp($SetHWTTValue)
+		{
+			$PREP_TELEGRAM = $this->PdtKNXFloatDec($SetHWTTValue);
+			
+			$HEADER = "0620F080001604000000F0C10038000100380302";
+			$TELEGRAM = pack("H*" ,$HEADER.$PREP_TELEGRAM);
+			$this->SendData($TELEGRAM);			
+			$this->SendDebug(__FUNCTION__, 'HotWaterTargetTemp(): send Temperature to ISM.' . $SetHWTTValue, 0);
 		}
 }
