@@ -711,26 +711,26 @@ require_once __DIR__ . '/../libs/datapoints.php';
 				{
 					case "DPT_Switch": // Bool (0)
 						$this->RegisterProfileBooleanEx("ISM_$DATAPOINT_TYPE",'','','', [
-							 [1, 'on', '', 0x00FF00],
-							 [0, 'off', '', 0xFF0000]
+							 [1, 'an', '', 0x00FF00],
+							 [0, 'aus', '', 0xFF0000]
 						]);
 					break;
 					case "DPT_Bool": // Bool (0)
 						$this->RegisterProfileBooleanEx("ISM_$DATAPOINT_TYPE",'','','', [
-							[1, 'true', '', 0x00FF00],
-							[0, 'false', '', 0xFF0000]
+							[1, 'wahr', '', 0x00FF00],
+							[0, 'falsch', '', 0xFF0000]
 					   ]);
 					break;
 					case "DPT_Enable": // Bool (0)
 						$this->RegisterProfileBooleanEx("ISM_$DATAPOINT_TYPE",'','','', [
-							[1, 'enable', '', 0x00FF00],
-							[0, 'disable', '', 0xFF0000]
+							[1, 'aktiv', '', 0x00FF00],
+							[0, 'deaktiv', '', 0xFF0000]
 					   ]);
 					break;
 					case "DPT_OpenClose": // Bool (0)
 						$this->RegisterProfileBooleanEx("ISM_$DATAPOINT_TYPE",'','','', [
-							[1, 'close', '', 0x00FF00],
-							[0, 'open', '', 0xFF0000]
+							[1, 'geschlossen', '', 0x00FF00],
+							[0, 'geöffnet', '', 0xFF0000]
 					   ]);
 					break;
 					case "DPT_Scaling": // Float (2)
