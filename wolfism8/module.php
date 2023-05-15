@@ -469,19 +469,19 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						switch($DATAPOINT_TYPE)
 						{
 							case "DPT_Switch":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "off";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "on";}
+								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "aus";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "an";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Bool":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "false";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "true";}
+								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "falsch";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "wahr";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Enable":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "disable";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "enable";}
+								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "deaktiv";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "aktiv";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_OpenClose":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "open";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "close";}
+								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "geöffnet";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "geschlossen";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Scaling":
@@ -765,8 +765,8 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							[0, "Auto", "", 0xFFFFFF ],
 							[1, "Comfort/Heizbetrieb", "", 0xFFFFFF],
 							[2, "Standby", "", 0xFFFFFF],
-							[3, "Economy/Sparbetrieb", "", 0xFFFFFF],
-							[4, "Building Protection", "", 0xFFFFFF]
+							[3, "Sparbetrieb", "", 0xFFFFFF],
+							[4, "Gebäudeschutz", "", 0xFFFFFF]
 						]);
 					break;
 					case "DPT_HVACMode_HG": // Integer (1)
@@ -780,10 +780,10 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					case "DPT_DHWMode": // Integer (1)
 						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
 							[0, "Auto", "", 0xFFFFFF ],
-							[1, "LegioProtect", "", 0xFFFFFF],
+							[1, "Legionellenschutz", "", 0xFFFFFF],
 							[2, "Normal", "", 0xFFFFFF],
-							[3, "Reduced", "", 0xFFFFFF],
-							[4, "Off/Frost/Protect", "", 0xFFFFFF]
+							[3, "Reduziert", "", 0xFFFFFF],
+							[4, "Aus/Frost/Schutz", "", 0xFFFFFF]
 						]);
 					break;
 					case "DPT_DHWMode_WW": // Integer (1)
@@ -796,23 +796,23 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					case "DPT_HVACContrMode": // Integer (1)
 						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
 							[0, "Auto", "", 0xFFFFFF ],
-							[1, "Heat", "", 0xFFFFFF],
-							[2, "Morning Warmup", "", 0xFFFFFF],
-							[3, "Cool", "", 0xFFFFFF],
-							[4, "Night Purge", "", 0xFFFFFF],
-							[5, "Precool", "", 0xFFFFFF],
-							[6, "Off", "", 0xFFFFFF],
+							[1, "Heizen", "", 0xFFFFFF],
+							[2, "Aufwärmen am Morgen", "", 0xFFFFFF],
+							[3, "Kühlen", "", 0xFFFFFF],
+							[4, "Nachtreinigung", "", 0xFFFFFF],
+							[5, "Vorkühlen", "", 0xFFFFFF],
+							[6, "Aus", "", 0xFFFFFF],
 							[7, "Test", "", 0xFFFFFF],
-							[8, "Emergency Heat", "", 0xFFFFFF],
-							[9, "Fan Only", "", 0xFFFFFF],
-							[10, "Free Cool", "", 0xFFFFFF],
-							[11, "Ice", "", 0xFFFFFF],
-							[12, "Maximum Heating Mode", "", 0xFFFFFF],
-							[13, "Economic Heat/Cool Mode", "", 0xFFFFFF],
-							[14, "Dehumidifiation", "", 0xFFFFFF],
-							[15, "Calibration Mode", "", 0xFFFFFF],
-							[16, "Emergency Cool Mode", "", 0xFFFFFF],
-							[17, "Emergency Steam Mode", "", 0xFFFFFF],
+							[8, "Notheizen", "", 0xFFFFFF],
+							[9, "nur Ventilator", "", 0xFFFFFF],
+							[10, "Freie Kühlung", "", 0xFFFFFF],
+							[11, "Eis", "", 0xFFFFFF],
+							[12, "Max. Heizmodus", "", 0xFFFFFF],
+							[13, "Sparsamer Heiz-/Kühlmodus", "", 0xFFFFFF],
+							[14, "Entfeuchtung", "", 0xFFFFFF],
+							[15, "Kalibrierungsmodus", "", 0xFFFFFF],
+							[16, "Notkühlung", "", 0xFFFFFF],
+							[17, "Notdampfung", "", 0xFFFFFF],
 							[20, "NoDem", "", 0xFFFFFF]
 						]);
 						break;
