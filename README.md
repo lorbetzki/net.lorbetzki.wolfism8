@@ -8,8 +8,7 @@
 3. [Software-Installation](#3-software-installation)
 4. [Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
 5. [Statusvariablen und Profile](#5-statusvariablen-und-profile)
-6. [WebFront](#6-webfront)
-7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+6. [PHP-Befehlsreferenz](#6-php-befehlsreferenz)
 
 ### 1. Funktionsumfang
 
@@ -44,9 +43,15 @@ Schreibbare Datenpunkte aktivieren.
 
 Name          				     | Beschreibung
 -------------------------------- | ----------------------------------------------------
-Programmwahl Heizkreis (57)      | Programmwahl Heizkreis, bspw Auto, Standby, Comfort Heizbetrieb usw.
+Warmwassersolltemperatur (*1)    | erlaubt das einstellen der Solltemperatur für den Warmwasserboiler
+Programmwahl Heizkreis (*2)      | Programmwahl Heizkreis, bspw Auto, Standby, Comfort Heizbetrieb usw.
+Programmwahl Warmwasser (58)     | Programmwahl Warmwasser, bspw Auto, Standby, Dauerbetrieb
 Sollwertkorrektur (65)           | Anpassung der Sollwertkorrektur 
 1x Warmwasserladung Global (194) | veranlasst die Anlage das Warmwasser einmalig auf Höchsttemperatur zu bringen.
+Programmwahl Mischer (*2)        | wie Programmwahl Heizkreis
+
+*1 = ID 56 und optional 69, 82, 95
+*2 = ID 57 und optional 70, 83, 96
 
 Optional: Störungsmeldungen entfernen. Nach einem Neustart der Heizung werden div. Störmeldungen gesendet, von Datenpunkten die die Anlage womöglich gar nicht hat. Hier kann man diese Meldungen entfernen so dass keine Variable angelegt wird.
 
@@ -79,8 +84,8 @@ z.B. 1_Heizkreis oder 65_Sollwertkorrketur.
 
 #### Profile
 
-Name                    | Typ
-------------------------| -------
+Name                          | Typ
+------------------------------| -------
 _ISM8_DPT_Switch              | bool
 _ISM8_DPT_Bool                | bool
 _ISM8_DPT_Enable              | bool
@@ -103,15 +108,12 @@ _ISM8_DPT_Value_1_Ucount      | integer
 _ISM8_DPT_Value_2_Ucount      | integer
 _ISM8_DPT_Value_Tempd_IN      | float
 _ISM8_DPT_Value_1_Ucount_Erkennung | integer
+_ISM8_DPT_HVACMode_HG         | integer
+_ISM8_DPT_DHWMode_WW          | integer 
+_ISM8_DPT_Value_Temp_WW       | float 
  
 
-### 6. WebFront
-
-Name                          							| Typ     | Beschreibung
---------------------------------------------------------| ------- | ------------
-
-
-### 7. PHP-Befehlsreferenz
+### 6. PHP-Befehlsreferenz
 
 `ISM_ReloadAllData(integer $InstanzID);`
 
