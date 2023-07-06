@@ -206,8 +206,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		public function SendData($Data) {
 			$this->SendDataToParent(json_encode([
 				'DataID' => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}",
-				//'Buffer' => utf8_encode($Data),
-				'Buffer' => mb_convert_encoding($Data, 'UTF-8', 'ISO-8859-1'),
+				'Buffer' => utf8_encode($Data),
 			]));
 		}
 	
