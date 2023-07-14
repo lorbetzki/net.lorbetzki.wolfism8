@@ -206,19 +206,20 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		public function SendData($Data) {
 			$this->SendDataToParent(json_encode([
 				'DataID' => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}",
-				'Buffer' => utf8_encode($Data),
+				//'Buffer' => utf8_encode($Data),
+				 'Buffer' => mb_convert_encoding($Data, 'UTF-8', 'ISO-8859-1'),
 			]));
 		}
 	
 		// receive data from ISM
 		public function ReceiveData($JSONString) {
 			$data = json_decode($JSONString);
-			$HEXDATA = utf8_decode($data->Buffer);
-			$HEX = $this->ReadHexToArray(utf8_decode($data->Buffer));
+			$HEXDATA = $data->Buffer;
+			$HEX = $this->ReadHexToArray(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
 			
 			// read data, create profiles and variable and set them
 			
-			$this->SendDebug(__FUNCTION__, 'ReceiveData(): receive data' . $HEXDATA, 0);
+			$this->SendDebug(__FUNCTION__, 'ReceiveData(): receive data ' . bin2hex($HEXDATA), 0);
 	
 			// wenn Mainservice - Array 10 = F0 und Subservice - Array = 06, dann sende eine Antwort. Unterbleibt eine Antwort, sendet die ISM8 die Nachricht noch 5x.
 				if ($HEX[10] == "F0" and $HEX[11] == "06"){
@@ -231,32 +232,39 @@ require_once __DIR__ . '/../libs/datapoints.php';
 				foreach($TELEGRAM as $DTP){
 					
 				$DTP_VALUE = $DTP['DATAPOINT_TYPE_VALUE'];
-				
-					if ($DTP['DATAPOINT_IPS_TYPE'] == 0 ){
+				// alle Boolean werden mit den Werten 0/1 geschrieben
+					if  ($DTP['DATAPOINT_IPS_TYPE'] == 0 ) {
 						switch ($DTP['DATAPOINT_TYPE_VALUE'])
 						{
-							case "on";
-							case  "enable" ;
-							case "true" ; 
-							case "close";
-								$DTP_VALUE = true;
+							case true: 
+							case 1:
+								$DTP_VALUE = 1;
 							break;
-							case "off";
-							case  "disable" ;
-							case "false" ; 
-							case "open";
-								$DTP_VALUE = false;
+							case false: 
+							case 0:
+								$DTP_VALUE = 0;
 							break;
 						}
 					}
-				
-					$DATAPOINT_TYPE = $DTP['DATAPOINT_TYPE'];
-					if (! IPS_VariableProfileExists("ISM_$DATAPOINT_TYPE"))
+					
+					// wenn es sich um die Symcon Standardvariable handelt, wird der Type für MaintainVariable geändert, ansonsten werden die neuenProfile mit ISM_* verwendet
+					$DATAPOINT_TYPE = $DTP['DATAPOINT_TYPE'] ;
+					if ($DATAPOINT_TYPE == "~Alert")
+					{
+							$DTP_Type = "~Alert";
+					}
+					else
+					{
+							$DTP_Type = "ISM_".$DTP['DATAPOINT_TYPE'];
+					}
+
+
+					if (! IPS_VariableProfileExists($DTP_Type))
 					{ 
 						//echo "Profil existiert nicht!";
-						$this->CreateVariableProfile($DATAPOINT_TYPE);
+						$this->CreateVariableProfile($DTP_Type );
 					}
-			
+						
 					$IPS_IDENT = "DTP_".$DTP['DATAPOINT_ID'];
 					$IPS_NAME = $DTP['DATAPOINT_ID']."_".$DTP['DATAPOINT_NAME'];
 					$POS = 1;
@@ -268,7 +276,8 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					{
 						if  ($this->ReadPropertyBoolean($IPS_IDENT)){ $CREATEVAR = false; }
 					}
-					$this->MaintainVariable($IPS_IDENT, $IPS_NAME, $DTP['DATAPOINT_IPS_TYPE'], "ISM_".$DTP['DATAPOINT_TYPE'], $DTP['DATAPOINT_ID'], $CREATEVAR);
+
+					$this->MaintainVariable($IPS_IDENT, $IPS_NAME, $DTP['DATAPOINT_IPS_TYPE'], $DTP_Type, $DTP['DATAPOINT_ID'], $CREATEVAR);
 					$this->SetValue($IPS_IDENT, $DTP_VALUE);
 
 					// bei Schreibbaren Idents diese Sichtbar machen.
@@ -285,7 +294,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		{
 			$HEX = unpack("H*" ,$HEX);
 			$HEX = explode(" ", (wordwrap((strtoupper($HEX[1])), 2, " ", true)));
-			$this->SendDebug(__FUNCTION__, 'ReadHexToArray(): Read HEX data to Array', 0);
+                        $this->SendDebug(__FUNCTION__, 'ReadHexToArray(): Read HEX data to Array ', 0);
 			return $HEX;
 		}
 
@@ -296,9 +305,8 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$CONNECTHEADER = "$HEX[6]$HEX[7]$HEX[8]$HEX[9]";
 			$OBJECTSERVER = "$HEX[10]86$HEX[12]$HEX[13]000000";
 			$ACK = pack("H*" ,"$HEADER$FRAMESIZE$CONNECTHEADER$OBJECTSERVER");
-			
 			$this->SendData($ACK);			
-			$this->SendDebug(__FUNCTION__, 'SendAck(): send ack to ISM.' . $ACK, 0);
+			$this->SendDebug(__FUNCTION__, 'SendAck(): send ack to ISM.' . bin2hex($ACK), 0);
 			return;
 		}
 
@@ -308,7 +316,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$this->SendData($HEX);
 
 			$this->LogMessage($this->Translate('ReloadAllData(): send reloaddata to ISM.'), KL_MESSAGE);
-			$this->SendDebug(__FUNCTION__, 'ReloadAllData(): send reloaddata to ISM' . $HEX, 0);
+			$this->SendDebug(__FUNCTION__, 'ReloadAllData(): send reloaddata to ISM ' . bin2hex($HEX), 0);
 			return;
 		}
 
@@ -469,19 +477,15 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						switch($DATAPOINT_TYPE)
 						{
 							case "DPT_Switch":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "aus";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "an";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Bool":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "falsch";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "wahr";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Enable":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "deaktiv";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "aktiv";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_OpenClose":
-								if ($DATAPOINT_VALUE_VAL == 0 ){ $DATAPOINT_TYPE_VALUE = "geöffnet";}elseif($DATAPOINT_VALUE_VAL == 1){ $DATAPOINT_TYPE_VALUE = "geschlossen";}
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Scaling":
@@ -681,6 +685,9 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							case "DPT_Value_Temp_WW":
 								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 2;
+							break;
+							case "~Alert":
+								$DATAPOINT_IPS_TYPE = 0;
 							break;
 						}
 						// Die Datapoint Länge setzt sich zusammen aus Datapoint ID (2) Datapoint Kommado (1) und Länge (1)
