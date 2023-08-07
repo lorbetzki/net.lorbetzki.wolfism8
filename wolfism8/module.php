@@ -286,7 +286,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$this->UpdateFormField("$IPS_IDENT", "visible", true);
 						$this->SendDebug(__FUNCTION__, 'EnableWrite: ' . $IPS_IDENT , 0);
 					}
-					$this->SendDebug(__FUNCTION__, 'ReadTelegram(): ' . $IPS_IDENT . $IPS_NAME , 0);
+					$this->SendDebug(__FUNCTION__, 'ReadTelegram(): ' . $IPS_IDENT ." - ". $IPS_NAME , 0);
 				}
 		}
 
@@ -465,6 +465,14 @@ require_once __DIR__ . '/../libs/datapoints.php';
 								$DATAPOINT_VALUE	.=	$HEX["$DATAPOINT_POS" + 20 + $n];
 							}
 							
+						// wenn Datenpunkt nicht existiert, dann schreibe ins Debuglog und beende Verarbeitung
+
+						if(empty($DP[$DATAPOINT_ID_VAL][0])) 
+						{
+							$this->SendDebug(__FUNCTION__, 'Unknown Datapoint can not found in Database(): ' . $DP[$DATAPOINT_ID_VAL][0], 0);
+							return;
+						} 
+
 						$DATAPOINT_VALUE_VAL	=	hexdec("$DATAPOINT_VALUE");
 						$DATAPOINT_TYPE			=	$DP[$DATAPOINT_ID_VAL][3];	
 						$DATAPOINT_NAME			=	$DP[$DATAPOINT_ID_VAL][2];
