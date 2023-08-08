@@ -214,7 +214,8 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		// receive data from ISM
 		public function ReceiveData($JSONString) {
 			$data = json_decode($JSONString);
-			$HEXDATA = $data->Buffer;
+			// daten fürs logfile aufbereiten
+			$HEXDATA = pack("H*", $data->Buffer);
 			$HEX = $this->ReadHexToArray(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
 			
 			// read data, create profiles and variable and set them
