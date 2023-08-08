@@ -4,9 +4,9 @@
     "author": "Kristian Lorbetzki",
     "url": "",
     "compatibility": {
-        "version": "7.0"
+        "version": "6.3"
     },
-    "version": "1.7",
+    "version": "1.8",
     "build": 230807,
     "date": 0
 }
