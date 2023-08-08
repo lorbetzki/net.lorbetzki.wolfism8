@@ -215,12 +215,12 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		public function ReceiveData($JSONString) {
 			$data = json_decode($JSONString);
 			// daten fürs logfile aufbereiten
-			$HEXDATA = pack("H*", $data->Buffer);
+			$HEXDATA = bin2hex(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
 			$HEX = $this->ReadHexToArray(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
 			
 			// read data, create profiles and variable and set them
 			
-			$this->SendDebug(__FUNCTION__, 'ReceiveData(): receive data ' . bin2hex($HEXDATA), 0);
+			$this->SendDebug(__FUNCTION__, 'ReceiveData(): receive data ' . $HEXDATA, 0);
 	
 			// wenn Mainservice - Array 10 = F0 und Subservice - Array = 06, dann sende eine Antwort. Unterbleibt eine Antwort, sendet die ISM8 die Nachricht noch 5x.
 				if ($HEX[10] == "F0" and $HEX[11] == "06"){
