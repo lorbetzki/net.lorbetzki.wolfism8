@@ -203,7 +203,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		}
 
 		// sending data to ISM
-		public function SendData($Data) {
+		public function SendData(string $Data) {
 			$this->SendDataToParent(json_encode([
 				'DataID' => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}",
 				//'Buffer' => utf8_encode($Data),
@@ -263,7 +263,8 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					if (! IPS_VariableProfileExists($DTP_Type))
 					{ 
 						//echo "Profil existiert nicht!";
-						$this->CreateVariableProfile($DTP_Type );
+						$this->CreateVariableProfile($DTP_Type);
+						$this->SendDebug("Create Profile", 'create profile for ' . $DTP_Type , 0);
 					}
 						
 					$IPS_IDENT = "DTP_".$DTP['DATAPOINT_ID'];
@@ -278,9 +279,17 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						if  ($this->ReadPropertyBoolean($IPS_IDENT)){ $CREATEVAR = false; }
 					}
 
-					$this->MaintainVariable($IPS_IDENT, $IPS_NAME, $DTP['DATAPOINT_IPS_TYPE'], $DTP_Type, $DTP['DATAPOINT_ID'], $CREATEVAR);
-					$this->SetValue($IPS_IDENT, $DTP_VALUE);
+					// und seit der Firmwareversion 1.8 vom ISM8 werden undokumentierte Kennungen gesendet, die werden nicht angelegt
+					if ($DTP['DATAPOINT_NAME'] == "Unbekannt")
+					{
+						$CREATEVAR = false;
+					}
 
+					if ($CREATEVAR)
+					{
+						$this->MaintainVariable($IPS_IDENT, $IPS_NAME, $DTP['DATAPOINT_IPS_TYPE'], $DTP_Type, $DTP['DATAPOINT_ID'], $CREATEVAR);
+						$this->SetValue($IPS_IDENT, $DTP_VALUE);
+					}
 					// bei Schreibbaren Idents diese Sichtbar machen.
 					if ( ($IPS_IDENT == "DTP_57") || ($IPS_IDENT == "DTP_65") || ($IPS_IDENT == "DTP_194") )
 					{
@@ -877,6 +886,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$this->RegisterProfileFloat("ISM_$DATAPOINT_TYPE", '', '', ' °C', 25, 65, 1, 1);
 					break;					
 				}
+				$this->SendDebug(__FUNCTION__, ' Profile created for ' . $DATAPOINT_TYPE, 0);
 		} 
 		// DPT ID 65 Sollwertkorrektur
 		private function SetPoint($SetPointValue)
