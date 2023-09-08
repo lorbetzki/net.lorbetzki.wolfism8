@@ -234,7 +234,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					
 				$DTP_VALUE = $DTP['DATAPOINT_TYPE_VALUE'];
 				// alle Boolean werden mit den Werten 0/1 geschrieben
-					if  ($DTP['DATAPOINT_IPS_TYPE'] == 0 ) {
+					if  (empty($DTP['DATAPOINT_TYPE_VALUE'])) {
 						switch ($DTP['DATAPOINT_TYPE_VALUE'])
 						{
 							case true: 
@@ -245,6 +245,8 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							case 0:
 								$DTP_VALUE = 0;
 							break;
+							default:
+								$DTP_VALUE = 0;
 						}
 					}
 					
@@ -279,7 +281,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						if  ($this->ReadPropertyBoolean($IPS_IDENT)){ $CREATEVAR = false; }
 					}
 
-					// und seit der Firmwareversion 1.8 vom ISM8 werden undokumentierte Kennungen gesendet, die werden nicht angelegt
+					// seit der Firmwareversion 1.8 vom ISM8 werden undokumentierte Kennungen gesendet, die werden nicht angelegt
 					if ($DTP['DATAPOINT_NAME'] == "Unbekannt")
 					{
 						$CREATEVAR = false;
@@ -538,7 +540,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							$DATAPOINT_IPS_TYPE = 3;
 								//
 							break;
-							case "DPT_FlowRate_m3/h":
+							case "DPT_FlowRate_m3h":
 								$DATAPOINT_IPS_TYPE = 2;
 								//
 							break;
@@ -729,6 +731,37 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			}
 		}
 
+		// funktion zum testen erstellt. da knallte es hin und wieder
+		public function CreateVariableProfileManu()
+		{
+			$this->CreateVariableProfile('DPT_Switch'); // Bool (0)
+			$this->CreateVariableProfile('DPT_Bool'); // Bool (0)
+			$this->CreateVariableProfile('DPT_Enable'); // Bool (0)
+			$this->CreateVariableProfile('DPT_OpenClose'); // Bool (0)
+			$this->CreateVariableProfile('DPT_Scaling'); // Float (2)
+			$this->CreateVariableProfile('DPT_Value_Temp'); // Float (2)
+			$this->CreateVariableProfile('DPT_Value_Tempd'); // Float (2)
+			$this->CreateVariableProfile('DPT_Value_Pres'); // Float (2)
+			$this->CreateVariableProfile('DPT_Power'); // Float (2)
+			$this->CreateVariableProfile('DPT_TimeOfDay'); // String (3)
+			$this->CreateVariableProfile('DPT_Date'); // String (3)
+			$this->CreateVariableProfile('DPT_FlowRate_m3h'); // Float (2) 
+			$this->CreateVariableProfile('DPT_HVACMode'); // Integer (1)
+			$this->CreateVariableProfile('DPT_HVACMode_HG'); // Integer (1)
+			$this->CreateVariableProfile('DPT_DHWMode'); // Integer (1)
+			$this->CreateVariableProfile('DPT_DHWMode_WW'); // Integer (1)
+			$this->CreateVariableProfile('DPT_HVACContrMode'); // Integer (1)
+			$this->CreateVariableProfile('DPT_ActiveEnergy'); // Float (2)
+			$this->CreateVariableProfile('DPT_ActiveEnergy_kWh'); // Float (2)
+			$this->CreateVariableProfile('DPT_Value_Volume_Flow'); // Float (2)
+			$this->CreateVariableProfile('DPT_Value_1_Ucount'); // Integer (1)
+			$this->CreateVariableProfile('DPT_Value_2_Ucount'); // Integer (1)
+			$this->CreateVariableProfile('DPT_Value_Tempd_IN'); // Float (2)
+			$this->CreateVariableProfile('DPT_Value_1_Ucount_Erkennung');
+			$this->CreateVariableProfile('DPT_Value_1_Ucount_Erkennung'); // Integer (1)
+			$this->CreateVariableProfile('DPT_Value_Temp_WW'); // Float (2)			
+		}
+
 		private function CreateVariableProfile($DATAPOINT_TYPE)
 		{
 			include __DIR__ . '/../libs/datapoints.php';
@@ -782,7 +815,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					case "DPT_Date": // String (3)
 						IPS_CreateVariableProfile("ISM_$DATAPOINT_TYPE", 3);
 					break;
-					case "DPT_FlowRate_m3/h": // Float (2) 
+					case "DPT_FlowRate_m3h": // Float (2) 
 						$this->RegisterProfileFloat("ISM_$DATAPOINT_TYPE", '', '', ' m3/h', -2147483647, 2147483647, 0.0001, 1);
 					break;
 					case "DPT_HVACMode": // Integer (1)
@@ -860,7 +893,6 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$this->RegisterProfileFloat("ISM_$DATAPOINT_TYPE", '', '', ' K', -4, 4, 0.5, 1);
 					break;											
 					case "DPT_Value_1_Ucount_Erkennung":
-						$DATAPOINT_TYPE_VALUE = $this->PdtUcount1($DATAPOINT_VALUE_VAL);
 						$DATAPOINT_IPS_TYPE = 1;
 					break;
 					case "DPT_Value_1_Ucount_Erkennung": // Integer (1)
