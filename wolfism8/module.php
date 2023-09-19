@@ -306,7 +306,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		{
 			$HEX = unpack("H*" ,$HEX);
 			$HEX = explode(" ", (wordwrap((strtoupper($HEX[1])), 2, " ", true)));
-                        $this->SendDebug(__FUNCTION__, 'ReadHexToArray(): Read HEX data to Array ', 0);
+                        $this->SendDebug(__FUNCTION__, 'ReadHexToArray(): Read HEX data to Array', 0);
 			return $HEX;
 		}
 
@@ -481,7 +481,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 
 						if(empty($DP[$DATAPOINT_ID_VAL][0])) 
 						{
-							$this->SendDebug(__FUNCTION__, 'Unknown Datapoint can not found in Database(): ' . $DP[$DATAPOINT_ID_VAL][0], 0);
+							$this->SendDebug(__FUNCTION__, 'Unknown Datapoint can not found in Database: ' . $DATAPOINT_ID, 0);
 							return;
 						} 
 
@@ -761,7 +761,20 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$this->CreateVariableProfile('DPT_Value_1_Ucount_Erkennung'); // Integer (1)
 			$this->CreateVariableProfile('DPT_Value_Temp_WW'); // Float (2)			
 		}
+		// funktion zum testen erstellt. da knallte es hin und wieder
+		public function DeleteVariableProfileManu()
+		{
+				$Profile = IPS_GetVariableProfileList();
 
+				foreach($Profile as $key =>$value) {
+					$ISM_Profile = strpos($value,"ISM_");
+						if ($ISM_Profile === 0)
+						{
+							$this->UnregisterProfile("$value");
+						}
+				}
+		}
+		
 		private function CreateVariableProfile($DATAPOINT_TYPE)
 		{
 			include __DIR__ . '/../libs/datapoints.php';
