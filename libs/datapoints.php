@@ -377,5 +377,8 @@ $DP = array(
                         array("369","BM-2(0)","Mischersolltemperatur MK1 - lesen","DPT_Value_Temp","Out","-","°C"),
                         array("370","BM-2(0)","Mischersolltemperatur MK2 - lesen","DPT_Value_Temp","Out","-","°C"),
                         array("371","BM-2(0)","Mischersolltemperatur MK3 - lesen","DPT_Value_Temp","Out","-","°C"),
-                        array("372","Allgemein","Zuletzt aktiver Störcode","DPT_Value_1_Ucount","Out","-","-")
+                        array("372","Allgemein","Zuletzt aktiver Störcode","DPT_Value_1_Ucount","Out","-","-"),
+
+						array("767","Unbekannt","Erkennung Leer","DPT_Value_2_Ucount","Out","-","-")
+
 );

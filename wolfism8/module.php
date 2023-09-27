@@ -222,6 +222,11 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			
 			$this->SendDebug(__FUNCTION__, 'ReceiveData(): receive data ' . $HEXDATA, 0);
 	
+			// Workaround. Ab V.1.8 wird ein unbekannter Datenpunkt 767 kontinuierlich gesendet. Dies verursacht Störungen. Wenn der kommt, wird dieser ignoriert
+			// 0620f080001604000000 f0 06 02 ff 000102ff0302aabb
+			if ($HEX[10] == "F0" and $HEX[11] == "06" and $HEX[12] == "02" and $HEX[13] == "FF" ){
+				return;		
+			}
 			// wenn Mainservice - Array 10 = F0 und Subservice - Array = 06, dann sende eine Antwort. Unterbleibt eine Antwort, sendet die ISM8 die Nachricht noch 5x.
 				if ($HEX[10] == "F0" and $HEX[11] == "06"){
 					// send ack to ISM
