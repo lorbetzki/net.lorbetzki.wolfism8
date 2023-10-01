@@ -762,7 +762,6 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$this->CreateVariableProfile('DPT_Value_1_Ucount'); // Integer (1)
 			$this->CreateVariableProfile('DPT_Value_2_Ucount'); // Integer (1)
 			$this->CreateVariableProfile('DPT_Value_Tempd_IN'); // Float (2)
-			$this->CreateVariableProfile('DPT_Value_1_Ucount_Erkennung');
 			$this->CreateVariableProfile('DPT_Value_1_Ucount_Erkennung'); // Integer (1)
 			$this->CreateVariableProfile('DPT_Value_Temp_WW'); // Float (2)			
 		}
@@ -910,9 +909,6 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					case "DPT_Value_Tempd_IN": // Float (2)
 						$this->RegisterProfileFloat("ISM_$DATAPOINT_TYPE", '', '', ' K', -4, 4, 0.5, 1);
 					break;											
-					case "DPT_Value_1_Ucount_Erkennung":
-						$DATAPOINT_IPS_TYPE = 1;
-					break;
 					case "DPT_Value_1_Ucount_Erkennung": // Integer (1)
 						$this->RegisterProfileIntegerEx("ISM_$DATAPOINT_TYPE", '', '', '', [
 							[0, "Kein Heizgerät", "", 0xFFFFFF ],
