@@ -400,7 +400,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 
 		private function DecBin($DEC, $MAXBIT=16)
 		{
-			return str_pad(decbin($DEC), $MAXBIT, "0", STR_PAD_LEFT);
+			return str_pad(decbin(intval($DEC)), $MAXBIT, "0", STR_PAD_LEFT);
 		}
 
 		private function PdtKNXFloatDec($DEC, $RES=0.01)
