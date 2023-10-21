@@ -502,15 +502,19 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						switch($DATAPOINT_TYPE)
 						{
 							case "DPT_Switch":
-								$DATAPOINT_IPS_TYPE = 0;
-							break;
 							case "DPT_Bool":
-								$DATAPOINT_IPS_TYPE = 0;
-							break;
 							case "DPT_Enable":
-								$DATAPOINT_IPS_TYPE = 0;
-							break;
 							case "DPT_OpenClose":
+							case "~Alert":
+								switch($DATAPOINT_VALUE_VAL)
+									{
+										case "0":
+														$DATAPOINT_TYPE_VALUE = false;
+										break;
+										case "1":
+														$DATAPOINT_TYPE_VALUE = true;
+										break;
+									}							
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Scaling":
@@ -518,21 +522,9 @@ require_once __DIR__ . '/../libs/datapoints.php';
 								$DATAPOINT_IPS_TYPE = 2;
 							break;
 							case "DPT_Value_Temp":
-								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
-								$DATAPOINT_IPS_TYPE = 2;
-							break;
 							case "DPT_Value_Tempd":
-								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
-								$DATAPOINT_IPS_TYPE = 2;
-							break;
 							case "DPT_Value_Tempd_IN":
-								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
-								$DATAPOINT_IPS_TYPE = 2;
-							break;
 							case "DPT_Value_Pres":
-								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
-								$DATAPOINT_IPS_TYPE = 2;
-							break;
 							case "DPT_Power":
 								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 2;
@@ -710,9 +702,6 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							case "DPT_Value_Temp_WW":
 								$DATAPOINT_TYPE_VALUE = $this->PdtKNXFloat($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 2;
-							break;
-							case "~Alert":
-								$DATAPOINT_IPS_TYPE = 0;
 							break;
 						}
 						// Die Datapoint Länge setzt sich zusammen aus Datapoint ID (2) Datapoint Kommado (1) und Länge (1)
