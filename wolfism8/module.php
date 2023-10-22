@@ -303,7 +303,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$this->UpdateFormField("$IPS_IDENT", "visible", true);
 						$this->SendDebug(__FUNCTION__, 'EnableWrite: ' . $IPS_IDENT , 0);
 					}
-					$this->SendDebug(__FUNCTION__, 'ReadTelegram(): ' . $IPS_IDENT ." - ". $IPS_NAME , 0);
+					$this->SendDebug(__FUNCTION__, 'ReadTelegram() Translate: ' . $IPS_IDENT ." - ". $IPS_NAME , 0);
 				}
 		}
 
@@ -506,15 +506,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 							case "DPT_Enable":
 							case "DPT_OpenClose":
 							case "~Alert":
-								switch($DATAPOINT_VALUE_VAL)
-									{
-										case "0":
-														$DATAPOINT_TYPE_VALUE = false;
-										break;
-										case "1":
-														$DATAPOINT_TYPE_VALUE = true;
-										break;
-									}							
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 0;
 							break;
 							case "DPT_Scaling":
@@ -530,127 +522,37 @@ require_once __DIR__ . '/../libs/datapoints.php';
 								$DATAPOINT_IPS_TYPE = 2;
 							break;
 							case "DPT_TimeOfDay":
-							$DATAPOINT_IPS_TYPE = 3;
+								$DATAPOINT_IPS_TYPE = 3;
 								//
 							break;
 							case "DPT_Date":
-							$DATAPOINT_IPS_TYPE = 3;
+								$DATAPOINT_IPS_TYPE = 3;
 								//
 							break;
 							case "DPT_FlowRate_m3h":
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 2;
 								//
 							break;
 							case "DPT_HVACMode":
-								switch($DATAPOINT_VALUE_VAL)
-								{
-									case "0":
-													$DATAPOINT_TYPE_VALUE = 0; //"Auto"
-									break;
-									case "1":
-													$DATAPOINT_TYPE_VALUE = 1; //"Comfort"
-									break;
-									case "2":
-													$DATAPOINT_TYPE_VALUE = 2; //"Standby"
-									break;
-									case "3":
-													$DATAPOINT_TYPE_VALUE = 3; //"Economy"
-									break;
-									case "4":
-													$DATAPOINT_TYPE_VALUE = 4; //"Building Protection"
-									break;
-								}
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 1;
 							break;
 							case "DPT_DHWMode":
-									switch($DATAPOINT_VALUE_VAL)
-									{
-										case "0":
-														$DATAPOINT_TYPE_VALUE = 0; //"Auto"
-										break;
-										case "1":
-														$DATAPOINT_TYPE_VALUE = 1; //"LegioProtect"
-										break;
-										case "2":
-														$DATAPOINT_TYPE_VALUE = 2; //"Normal"
-										break;
-										case "3":
-														$DATAPOINT_TYPE_VALUE = 3; //"Reduced"
-										break;
-										case "4":
-														$DATAPOINT_TYPE_VALUE = 4; //"Off/FrostProtect"
-										break;
-								}
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 1;
 							break;
 							case "DPT_HVACContrMode":
-									switch($DATAPOINT_VALUE_VAL)
-									{
-										case "0":
-														$DATAPOINT_TYPE_VALUE = 0; //"Auto"
-										break;
-										case "1":
-														$DATAPOINT_TYPE_VALUE = 1; //"Heat"
-										break;
-										case "2":
-														$DATAPOINT_TYPE_VALUE = 2; //"Morning Warmup"
-										break;
-										case "3":
-														$DATAPOINT_TYPE_VALUE = 3; //"Cool"
-										break;
-										case "4":
-														$DATAPOINT_TYPE_VALUE = 4; //"Night Purge"
-										break;
-										case "5":
-														$DATAPOINT_TYPE_VALUE = 5; // "Precool"
-										break;
-										case "6":
-														$DATAPOINT_TYPE_VALUE = 6; // "Off"
-										break;
-										case "7":
-														$DATAPOINT_TYPE_VALUE = 7; // "Test"
-										break;
-										case "8":
-														$DATAPOINT_TYPE_VALUE = 8; // "Emergency Heat"
-										break;
-										case "9":
-														$DATAPOINT_TYPE_VALUE = 9; // "Fan Only"
-										break;
-										case "10":
-														$DATAPOINT_TYPE_VALUE = 10; // "Free Cool"
-										break;
-										case "11":
-														$DATAPOINT_TYPE_VALUE = 11; // "Ice"
-										break;
-										case "12":
-														$DATAPOINT_TYPE_VALUE = 12; // "Maximum Heating Mode"
-										break;
-										case "13":
-														$DATAPOINT_TYPE_VALUE = 13; //"Economic Heat/Cool Mode"
-										break;
-										case "14":
-														$DATAPOINT_TYPE_VALUE = 14; //"Dehumidifiation"
-										break;
-										case "15":
-														$DATAPOINT_TYPE_VALUE = 15; // "Calibration Mode"
-										break;
-										case "16":
-														$DATAPOINT_TYPE_VALUE = 16; //"Emergency Cool Mode"
-										break;
-										case "17":
-														$DATAPOINT_TYPE_VALUE = 17; //"Emergency Steam Mode"
-										break;
-										case "20":
-														$DATAPOINT_TYPE_VALUE = 20; //"NoDem"
-										break;	
-								}
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 1;
 							break;
 							case "DPT_ActiveEnergy":
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 2;
 								//
 							break;
 							case "DPT_ActiveEnergy_kWh":
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 2;
 								//
 							break;
@@ -662,41 +564,20 @@ require_once __DIR__ . '/../libs/datapoints.php';
 								$DATAPOINT_TYPE_VALUE = $this->PdtUcount1($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 1;
 							break;
+							case "DPT_Value_1_Ucount_Erkennung":
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
+								$DATAPOINT_IPS_TYPE = 1;
+							break;
 							case "DPT_Value_2_Ucount":
 								$DATAPOINT_TYPE_VALUE = $this->PdtUcount2($DATAPOINT_VALUE_VAL);
 								$DATAPOINT_IPS_TYPE = 1;
 							break;
 							case "DPT_HVACMode_HG":
-								switch($DATAPOINT_VALUE_VAL)
-								{
-									case "0":
-													$DATAPOINT_TYPE_VALUE = 0; //"Auto"
-									break;
-									case "1":
-													$DATAPOINT_TYPE_VALUE = 1; //"Heizbetrieb"
-									break;
-									case "2":
-													$DATAPOINT_TYPE_VALUE = 2; //"Standby"
-									break;
-									case "3":
-													$DATAPOINT_TYPE_VALUE = 3; //"Sparbetrieb"
-									break;
-								}
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 1;
 							break;
 							case "DPT_DHWMode_WW":
-									switch($DATAPOINT_VALUE_VAL)
-									{
-										case "0":
-														$DATAPOINT_TYPE_VALUE = 0; //"Auto"
-										break;
-										case "2":
-														$DATAPOINT_TYPE_VALUE = 2; //"Normal"
-										break;
-										case "4":
-														$DATAPOINT_TYPE_VALUE = 4; //"Standby"
-										break;
-								}
+								$DATAPOINT_TYPE_VALUE = $DATAPOINT_VALUE_VAL;
 								$DATAPOINT_IPS_TYPE = 1;
 							break;
 							case "DPT_Value_Temp_WW":
