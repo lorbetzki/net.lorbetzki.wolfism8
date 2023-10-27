@@ -214,15 +214,13 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		// receive data from ISM
 		public function ReceiveData($JSONString) {
 			$data = json_decode($JSONString);
-			// daten fürs logfile aufbereiten
-			//$HEXDATA = bin2hex(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
-//			$HEX = $this->ReadHexToArray(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
 			$RAWDATA = bin2hex(utf8_decode($data->Buffer));
 			$this->SendDebug(__FUNCTION__, 'receive RAW Data ' . $RAWDATA, 0);
 
 			$HEX = explode(" ", (wordwrap($HEX, 2, " ", true)));
 			
 			// read data, create profiles and variable and set them
+
 			// Workaround. Ab V.1.8 wird ein unbekannter Datenpunkt 767 kontinuierlich gesendet. Dies verursacht Störungen. Wenn der kommt, wird dieser ignoriert
 			// 0620f080001604000000 f0 06 02 ff 000102ff0302aabb
 			if ($HEX[10] == "f0" and $HEX[11] == "06" and $HEX[12] == "02" and $HEX[13] == "ff" ){
@@ -307,15 +305,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					$this->SendDebug(__FUNCTION__, 'Translate Hex to Value: ' . $IPS_IDENT ." - ". $IPS_NAME , 0);
 				}
 		}
-/*
-		private function ReadHexToArray($HEX) 
-		{
-			$HEX = unpack("H*" ,$HEX);
-			$HEX = explode(" ", (wordwrap((strtoupper($HEX[1])), 2, " ", true)));
-                        $this->SendDebug(__FUNCTION__, 'ReadHexToArray(): Read HEX data to Array', 0);
-			return $HEX;
-		}
-*/
+
 		private function SendAck($HEX)
 		{
 			$HEADER = "$HEX[0]$HEX[1]$HEX[2]$HEX[3]";
