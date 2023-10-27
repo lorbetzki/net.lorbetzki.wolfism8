@@ -217,7 +217,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$RAWDATA = bin2hex(utf8_decode($data->Buffer));
 			$this->SendDebug(__FUNCTION__, 'receive RAW Data ' . $RAWDATA, 0);
 
-			$HEX = explode(" ", (wordwrap($HEX, 2, " ", true)));
+			$HEX = explode(" ", wordwrap($RAWDATA, 2, " ", true));
 			
 			// read data, create profiles and variable and set them
 
