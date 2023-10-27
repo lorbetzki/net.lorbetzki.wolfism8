@@ -215,20 +215,21 @@ require_once __DIR__ . '/../libs/datapoints.php';
 		public function ReceiveData($JSONString) {
 			$data = json_decode($JSONString);
 			// daten fürs logfile aufbereiten
-			$HEXDATA = bin2hex(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
-			$HEX = $this->ReadHexToArray(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
+			//$HEXDATA = bin2hex(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
+//			$HEX = $this->ReadHexToArray(mb_convert_encoding($data->Buffer, 'ISO-8859-1', 'UTF-8'));
+			$RAWDATA = bin2hex(utf8_decode($data->Buffer));
+			$this->SendDebug(__FUNCTION__, 'receive RAW Data ' . $RAWDATA, 0);
+
+			$HEX = explode(" ", (wordwrap($HEX, 2, " ", true)));
 			
 			// read data, create profiles and variable and set them
-			
-			$this->SendDebug(__FUNCTION__, 'ReceiveData(): receive data ' . $HEXDATA, 0);
-	
 			// Workaround. Ab V.1.8 wird ein unbekannter Datenpunkt 767 kontinuierlich gesendet. Dies verursacht Störungen. Wenn der kommt, wird dieser ignoriert
 			// 0620f080001604000000 f0 06 02 ff 000102ff0302aabb
-			if ($HEX[10] == "F0" and $HEX[11] == "06" and $HEX[12] == "02" and $HEX[13] == "FF" ){
+			if ($HEX[10] == "f0" and $HEX[11] == "06" and $HEX[12] == "02" and $HEX[13] == "ff" ){
 				return;		
 			}
 			// wenn Mainservice - Array 10 = F0 und Subservice - Array = 06, dann sende eine Antwort. Unterbleibt eine Antwort, sendet die ISM8 die Nachricht noch 5x.
-				if ($HEX[10] == "F0" and $HEX[11] == "06"){
+				if ($HEX[10] == "f0" and $HEX[11] == "06"){
 					// send ack to ISM
 					$this->SendAck($HEX);			
 				}
@@ -303,10 +304,10 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$this->UpdateFormField("$IPS_IDENT", "visible", true);
 						$this->SendDebug(__FUNCTION__, 'EnableWrite: ' . $IPS_IDENT , 0);
 					}
-					$this->SendDebug(__FUNCTION__, 'ReadTelegram() Translate: ' . $IPS_IDENT ." - ". $IPS_NAME , 0);
+					$this->SendDebug(__FUNCTION__, 'Translate Hex to Value: ' . $IPS_IDENT ." - ". $IPS_NAME , 0);
 				}
 		}
-
+/*
 		private function ReadHexToArray($HEX) 
 		{
 			$HEX = unpack("H*" ,$HEX);
@@ -314,7 +315,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
                         $this->SendDebug(__FUNCTION__, 'ReadHexToArray(): Read HEX data to Array', 0);
 			return $HEX;
 		}
-
+*/
 		private function SendAck($HEX)
 		{
 			$HEADER = "$HEX[0]$HEX[1]$HEX[2]$HEX[3]";
@@ -323,7 +324,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$OBJECTSERVER = "$HEX[10]86$HEX[12]$HEX[13]000000";
 			$ACK = pack("H*" ,"$HEADER$FRAMESIZE$CONNECTHEADER$OBJECTSERVER");
 			$this->SendData($ACK);			
-			$this->SendDebug(__FUNCTION__, 'SendAck(): send ack to ISM.' . bin2hex($ACK), 0);
+			$this->SendDebug(__FUNCTION__, 'send ACK to ISM: ' . bin2hex($ACK), 0);
 			return;
 		}
 
@@ -333,7 +334,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$this->SendData($HEX);
 
 			$this->LogMessage($this->Translate('ReloadAllData(): send reloaddata to ISM.'), KL_MESSAGE);
-			$this->SendDebug(__FUNCTION__, 'ReloadAllData(): send reloaddata to ISM ' . bin2hex($HEX), 0);
+			$this->SendDebug(__FUNCTION__, 'send reloaddata-command to ISM: ' . bin2hex($HEX), 0);
 			return;
 		}
 
@@ -465,7 +466,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 				$DATAPOINT_POS	=	"0";
 				$DATAPOINT_VALUE	=	"" ;
 
-			if ($MAINSERVICE == "F0" and $SUBSERVICE == "06"){	
+			if ($MAINSERVICE == "f0" and $SUBSERVICE == "06"){	
 			
 				for( $i=1; $i <= $NUMBER_OF_DP; $i++ ){
 						
@@ -486,7 +487,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 
 						if(empty($DP[$DATAPOINT_ID_VAL][0])) 
 						{
-							$this->SendDebug(__FUNCTION__, 'Unknown Datapoint can not found in Database: ' . $DATAPOINT_ID, 0);
+							$this->SendDebug(__FUNCTION__, 'Unknown: Datapoint can not found in Database: ' . $DATAPOINT_ID, 0);
 							return;
 						} 
 
@@ -813,7 +814,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$HEADER = "0620F080001604000000F0C10041000100410302";
 			$TELEGRAM = pack("H*" ,$HEADER.$PREP_TELEGRAM);
 			$this->SendData($TELEGRAM);			
-			$this->SendDebug(__FUNCTION__, 'SetPoint(): send Setpoint to ISM.' . $SetPointValue, 0);
+			$this->SendDebug(__FUNCTION__, 'send Setpoint to ISM: ' . $SetPointValue, 0);
 		}
 
 		// for DPT ID 57 Programmwahl Heizkreis
@@ -839,7 +840,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			}
 		
 			$this->SendData($PREP_TELEGRAM);			
-			$this->SendDebug(__FUNCTION__, 'SetOperatingModeHeat(): set mode to ISM ' . $ONOFF, 0);
+			$this->SendDebug(__FUNCTION__, 'set mode to ISM: ' . $ONOFF, 0);
 		}
 
 		// for DPT ID 58 Programmwahl Warmwasser
@@ -859,7 +860,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			}
 		
 			$this->SendData($PREP_TELEGRAM);			
-			$this->SendDebug(__FUNCTION__, 'SetOperatingModeWater(): set mode to ISM ' . $ONOFF, 0);
+			$this->SendDebug(__FUNCTION__, 'set mode to ISM: ' . $ONOFF, 0);
 		}
 
 		// DPT ID 56 Warmwassersolltemperatur
@@ -870,6 +871,6 @@ require_once __DIR__ . '/../libs/datapoints.php';
 			$HEADER = "0620F080001604000000F0C10038000100380302";
 			$TELEGRAM = pack("H*" ,$HEADER.$PREP_TELEGRAM);
 			$this->SendData($TELEGRAM);			
-			$this->SendDebug(__FUNCTION__, 'HotWaterTargetTemp(): send Temperature to ISM.' . $SetHWTTValue, 0);
+			$this->SendDebug(__FUNCTION__, 'send Temperature to ISM:' . $SetHWTTValue, 0);
 		}
 }
