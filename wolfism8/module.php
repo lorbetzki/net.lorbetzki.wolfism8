@@ -286,7 +286,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					}
 
 					// seit der Firmwareversion 1.8 vom ISM8 werden undokumentierte Kennungen gesendet, die werden nicht angelegt
-					if ($DTP['DATAPOINT_NAME'] == "Unbekannt")
+					if ($DTP['DATAPOINT_NAME'] === "Unbekannt")
 					{
 						$CREATEVAR = false;
 						$this->SendDebug(__FUNCTION__, 'Variable with ident ' . $IPS_IDENT . " not created because it is a unknown datapoint " , 0);
@@ -294,10 +294,10 @@ require_once __DIR__ . '/../libs/datapoints.php';
 
 					if ($CREATEVAR)
 					{
-						if  (@$this->GetIDForIdent($IPS_IDENT))
+						if  (@!$this->GetIDForIdent($IPS_IDENT))
 						{
 							$this->MaintainVariable($IPS_IDENT, $IPS_NAME, $DTP['DATAPOINT_IPS_TYPE'], $DTP_Type, $DTP['DATAPOINT_ID'], $CREATEVAR);
-							$this->SendDebug(__FUNCTION__, 'Create variable '. $IPS_IDENT .'with type ' . $DTP_Type, 0);
+							$this->SendDebug(__FUNCTION__, 'Create variable '. $IPS_IDENT .' with type ' . $DTP_Type, 0);
 						}
 						$this->SetValue($IPS_IDENT, $DTP_VALUE);
 						$this->SendDebug(__FUNCTION__, 'Set variable with ident ' . $IPS_IDENT . " to value " .$DTP_VALUE , 0);
