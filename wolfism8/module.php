@@ -289,6 +289,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					if ($DTP['DATAPOINT_NAME'] == "Unbekannt")
 					{
 						$CREATEVAR = false;
+						$this->SendDebug(__FUNCTION__, 'Variable with ident ' . $IPS_IDENT . " not created because it is a unknown datapoint " , 0);
 					}
 
 					if ($CREATEVAR)
