@@ -305,6 +305,10 @@ require_once __DIR__ . '/../libs/datapoints.php';
 						$this->SetValue($IPS_IDENT, $DTP_VALUE);
 						$this->SendDebug(__FUNCTION__, 'Set variable with ident ' . $IPS_IDENT . " to value " .$DTP_VALUE , 0);
 						}
+						else
+						{
+							$this->SendDebug(__FUNCTION__, 'Variable couldnt be set cause unknown error!' . $IPS_IDENT . " to value " .$DTP_VALUE , 0);
+						}
 					}
 					// bei Schreibbaren Idents diese Sichtbar machen.
 					if ( ($IPS_IDENT == "DTP_57") || ($IPS_IDENT == "DTP_65") || ($IPS_IDENT == "DTP_194") )
