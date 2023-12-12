@@ -269,7 +269,7 @@ require_once __DIR__ . '/../libs/datapoints.php';
 					if (! IPS_VariableProfileExists($DTP_Type))
 					{ 
 						//echo "Profil existiert nicht!";
-						$this->CreateVariableProfile($DTP_Type);
+						$this->CreateVariableProfile($DTP['DATAPOINT_TYPE']);
 						$this->SendDebug("Create Profile", 'create profile for ' . $DTP_Type , 0);
 					}
 						
